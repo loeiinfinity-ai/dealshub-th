@@ -740,104 +740,170 @@ function renderAdminTable(){
 
 // =================== PRODUCT FORM ===================
 // =================== SHOPEE AUTO-IMPORT ===================
+
+// CORS proxy list — tried in order until one works
+const PROXIES = [
+  url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+];
+
+async function tryFetch(targetUrl) {
+  for (const makeProxy of PROXIES) {
+    try {
+      const res = await fetch(makeProxy(targetUrl), { signal: AbortSignal.timeout(10000) });
+      if (!res.ok) continue;
+      const text = await res.text();
+      if (text && text.length > 500) return text;
+    } catch(e) { /* try next */ }
+  }
+  return null;
+}
+
+// Resolve short URL (s.shopee.co.th) → real product URL via proxy
+async function resolveUrl(url) {
+  // If already a full shopee product URL, return as-is
+  if (/shopee\.co\.th\/[^/]+\/i\.\d+\.\d+/.test(url)) return url;
+  // Try to get redirect target from allorigins (returns final URL in status)
+  try {
+    const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, { signal: AbortSignal.timeout(8000) });
+    const data = await res.json();
+    // allorigins returns the final URL after redirect in status.url
+    if (data.status && data.status.url && data.status.url !== url) return data.status.url;
+    // If contents has a redirect meta or canonical, extract it
+    if (data.contents) {
+      const m = data.contents.match(/canonical['"]\s+href=['"]([^'"]+shopee[^'"]+)['"]/i)
+             || data.contents.match(/url=(['"]?)(https:\/\/shopee\.co\.th[^'">\s]+)/i);
+      if (m) return m[m.length-1];
+    }
+  } catch(e) {}
+  return url; // fallback: use original
+}
+
 async function fetchShopeeData(){
-  const url = document.getElementById('importUrl').value.trim();
-  if(!url){ setImportStatus('err','กรุณาวางลิงก์ Shopee ก่อน'); return; }
+  const rawUrl = document.getElementById('importUrl').value.trim();
+  if(!rawUrl){ setImportStatus('err','กรุณาวางลิงก์ Shopee ก่อน'); return; }
 
   const btn = document.getElementById('importBtn');
   btn.disabled = true;
-  setImportStatus('loading','⏳ กำลังดึงข้อมูลจาก Shopee...');
   document.getElementById('importPreview').classList.remove('show');
 
   try {
-    // Use allorigins proxy to bypass CORS
-    const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
-    const res = await fetch(proxyUrl);
-    const data = await res.json();
-    const html = data.contents || '';
+    // Step 1: resolve short URL if needed
+    setImportStatus('loading','⏳ กำลัง resolve ลิงก์...');
+    const targetUrl = await resolveUrl(rawUrl);
 
-    if(!html){ throw new Error('ไม่สามารถดึงข้อมูลได้'); }
+    // Step 2: fetch page HTML
+    setImportStatus('loading','⏳ กำลังดึงข้อมูลสินค้า...');
+    const html = await tryFetch(targetUrl);
+    if(!html) throw new Error('proxy ทุกตัวใช้ไม่ได้ในขณะนี้');
 
-    // Parse with DOMParser
+    // Step 3: parse HTML
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
 
     const getMeta = (prop) => {
       const el = doc.querySelector(`meta[property="${prop}"], meta[name="${prop}"]`);
-      return el ? el.getAttribute('content') : '';
+      return el ? (el.getAttribute('content')||'').trim() : '';
     };
 
-    // Extract fields
-    let title = getMeta('og:title') || doc.title || '';
-    let image = getMeta('og:image') || '';
-    let desc  = getMeta('og:description') || '';
+    let title = getMeta('og:title') || getMeta('twitter:title') || doc.title || '';
+    let image = getMeta('og:image') || getMeta('twitter:image') || '';
+    let desc  = getMeta('og:description') || getMeta('description') || '';
     let price = 0, originalPrice = 0;
 
-    // Try JSON-LD for price
+    // JSON-LD structured data (most reliable)
     doc.querySelectorAll('script[type="application/ld+json"]').forEach(s => {
       try {
         const j = JSON.parse(s.textContent);
-        const offer = j.offers || (Array.isArray(j) && j[0]?.offers);
-        if(offer){
-          const p = offer.price || offer.lowPrice;
-          if(p) price = parseFloat(p);
-        }
-        if(j.name && !title) title = j.name;
-        if(j.image && !image) image = Array.isArray(j.image) ? j.image[0] : j.image;
+        const items = Array.isArray(j) ? j : [j];
+        items.forEach(item => {
+          const offer = item.offers;
+          if(offer){
+            const p = parseFloat(offer.price || offer.lowPrice || 0);
+            const op = parseFloat(offer.highPrice || 0);
+            if(p && !price) price = p;
+            if(op && !originalPrice) originalPrice = op;
+          }
+          if(item.name && !title) title = item.name;
+          if(item.image && !image){
+            image = Array.isArray(item.image) ? item.image[0] : item.image;
+            if(typeof image === 'object') image = image.url || '';
+          }
+        });
       } catch(e){}
     });
 
-    // Fallback: parse price from meta or text
+    // Meta price fallbacks
     if(!price){
-      const priceMeta = getMeta('product:price:amount') || getMeta('og:price:amount');
-      if(priceMeta) price = parseFloat(priceMeta);
+      const pm = getMeta('product:price:amount') || getMeta('og:price:amount');
+      if(pm) price = parseFloat(pm);
     }
+
+    // Regex price extraction from raw HTML
     if(!price){
-      // Try to find price pattern in HTML: ฿X,XXX or XX.XX
-      const priceMatch = html.match(/[฿]\s*([\d,]+(?:\.\d{1,2})?)/);
-      if(priceMatch) price = parseFloat(priceMatch[1].replace(/,/g,''));
-      if(!price){
-        const numMatch = html.match(/"price"\s*:\s*"?([\d.]+)"?/);
-        if(numMatch) price = parseFloat(numMatch[1]);
+      const patterns = [
+        /"currentPrice"\s*:\s*([\d.]+)/,
+        /"price"\s*:\s*"?([\d.]+)"?/,
+        /[฿]\s*([\d,]+(?:\.\d{1,2})?)/,
+        /"discountPrice"\s*:\s*([\d.]+)/,
+        /price['"]\s*:\s*['"]([\d.]+)['"]/i,
+      ];
+      for(const re of patterns){
+        const m = html.match(re);
+        if(m){ price = parseFloat(m[1].replace(/,/g,'')); if(price) break; }
       }
     }
+    if(!originalPrice){
+      const m = html.match(/"originalPrice"\s*:\s*([\d.]+)/) || html.match(/"slashedPrice"\s*:\s*([\d.]+)/);
+      if(m) originalPrice = parseFloat(m[1]);
+    }
 
-    // Clean title — Shopee titles are often "Product | Shopee Thailand"
-    title = title.replace(/\s*[\||\-]\s*Shopee.*$/i,'').replace(/\s*\| Shopee.*$/i,'').trim();
-    // Remove leading/trailing brackets content like "[เก็บโค้ด...]"
-    title = title.replace(/^\[.*?\]\s*/,'').trim();
+    // Clean title
+    title = title
+      .replace(/\s*[\|–\-]\s*Shopee.*$/i,'')
+      .replace(/\s*\|\s*Shopee.*$/i,'')
+      .replace(/^【.*?】\s*/,'')
+      .replace(/^\[.*?\]\s*/,'')
+      .trim();
 
-    if(!title){ throw new Error('ดึงชื่อสินค้าไม่ได้ ลองใช้ลิงก์ตรงจาก Shopee'); }
+    if(!title) throw new Error('ดึงชื่อสินค้าไม่ได้');
 
-    // Fill form fields
+    // Fix image URL
+    if(image && image.startsWith('//')) image = 'https:' + image;
+
+    // Fill form
     document.getElementById('fNameTh').value = title;
     document.getElementById('fNameEn').value = title;
     document.getElementById('fDescTh').value = desc;
     document.getElementById('fDescEn').value = desc;
-    document.getElementById('fShopee').value = url;
+    document.getElementById('fShopee').value = rawUrl;
 
     if(price){
       document.getElementById('fPrice').value = Math.round(price);
+      if(originalPrice && originalPrice > price)
+        document.getElementById('fOriginal').value = Math.round(originalPrice);
       autoDiscount();
     }
 
     if(image){
-      // Shopee images sometimes use //cf.shopee.co.th — ensure https
-      if(image.startsWith('//')) image = 'https:' + image;
       document.getElementById('fImageUrl').value = image;
       const prev = document.getElementById('fImgPreview');
       prev.src = image; prev.style.display = 'block';
       document.getElementById('importPreviewImg').src = image;
+      document.getElementById('importPreviewImg').style.display = '';
     }
 
-    // Show preview
     document.getElementById('importPreviewName').textContent = title;
-    document.getElementById('importPreviewPrice').textContent = price ? '฿'+Math.round(price).toLocaleString('th-TH') : 'ไม่พบราคา (กรอกเอง)';
+    document.getElementById('importPreviewPrice').textContent = price
+      ? '฿' + Math.round(price).toLocaleString('th-TH')
+      : 'ไม่พบราคา — กรอกเองในช่องด้านล่าง';
     document.getElementById('importPreview').classList.add('show');
+    setImportStatus('ok','✅ ดึงข้อมูลสำเร็จ! เลือกหมวดหมู่ แล้วกด "บันทึกสินค้า"');
 
-    setImportStatus('ok','✅ ดึงข้อมูลสำเร็จ! เลือกหมวดหมู่แล้วกด "บันทึกสินค้า"');
   } catch(e) {
-    setImportStatus('err','❌ '+( e.message || 'ดึงข้อมูลไม่สำเร็จ') + ' — ลองวางลิงก์สินค้าตรงๆ จาก Shopee');
+    setImportStatus('err','❌ ' + (e.message||'ดึงข้อมูลไม่สำเร็จ')
+      + ' — ลองใช้ลิงก์ตรงจากหน้าสินค้า Shopee (ไม่ใช่ short link)');
   }
   btn.disabled = false;
 }
