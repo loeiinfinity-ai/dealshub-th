@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DealsHub Thailand — ช้อปคุ้มค่า รวมดีลฮิต</title>
-  <meta name="description" content="รวมสินค้าขายดีจาก Shopee และ TikTok Shop พร้อมโปรโมชั่นสุดคุ้ม" />
+  <meta name="description" content="รวมสินค้าขายดีจาก Shopee พร้อมโปรโมชั่นสุดคุ้ม" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
@@ -74,10 +74,10 @@
     .price-now{font-size:1.05rem;font-weight:800;color:var(--orange)}
     .price-was{font-size:.78rem;color:var(--gray-300);text-decoration:line-through}
     .card-btns{display:flex;gap:.4rem;margin-top:auto}
-    .btn-shopee,.btn-tiktok{flex:1;padding:.45rem .3rem;border:none;border-radius:7px;font-size:.75rem;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity .15s;text-align:center}
-    .btn-shopee{background:#f97316;color:#fff}
-    .btn-tiktok{background:#010101;color:#fff}
-    .btn-shopee:hover,.btn-tiktok:hover{opacity:.85}
+    .btn-shopee{flex:1;padding:.45rem .3rem;border:none;border-radius:7px;font-size:.75rem;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity .15s;text-align:center;background:#f97316;color:#fff}
+    .btn-copy{padding:.45rem .5rem;border:1.5px solid var(--gray-200);border-radius:7px;font-size:.75rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;background:#fff;color:var(--gray-500)}
+    .btn-copy:hover{border-color:var(--orange);color:var(--orange)}
+    .btn-shopee:hover{opacity:.85}
 
     /* PAGINATION */
     .pagination{display:flex;justify-content:center;gap:.5rem;padding:1.5rem 0 2rem}
@@ -113,7 +113,8 @@
     .modal-btns{display:flex;gap:.75rem}
     .modal-btn{flex:1;padding:.8rem;border:none;border-radius:10px;font-size:.95rem;font-weight:700;cursor:pointer;font-family:inherit}
     .modal-shopee{background:var(--orange);color:#fff}
-    .modal-tiktok{background:#010101;color:#fff}
+    .modal-copy-btn{background:var(--gray-100);color:var(--gray-700);border:none;border-radius:10px;padding:.8rem 1.25rem;font-size:.95rem;font-weight:700;cursor:pointer;font-family:inherit;margin-top:.75rem;width:100%;transition:background .15s}
+    .modal-copy-btn:hover{background:var(--gray-200)}
 
     /* PIN MODAL */
     #pinOverlay .modal-box{max-width:400px;padding:2.5rem 2rem;text-align:center}
@@ -137,8 +138,13 @@
     .stat-num{font-size:1.5rem;font-weight:800;color:var(--orange)}
     .stat-label{font-size:.78rem;color:var(--gray-500);margin-top:.2rem}
     .admin-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;gap:.75rem;flex-wrap:wrap}
+    .admin-toolbar-left{display:flex;gap:.5rem;flex-wrap:wrap}
     .add-btn{background:var(--orange);color:#fff;border:none;border-radius:8px;padding:.55rem 1.1rem;font-size:.88rem;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:.35rem}
     .add-btn:hover{background:var(--orange-dark)}
+    .quick-add-btn{background:#22c55e;color:#fff;border:none;border-radius:8px;padding:.55rem 1.1rem;font-size:.88rem;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:.35rem}
+    .quick-add-btn:hover{background:#16a34a}
+    .export-btn{background:var(--gray-100);color:var(--gray-700);border:1.5px solid var(--gray-200);border-radius:8px;padding:.55rem 1rem;font-size:.88rem;font-weight:600;cursor:pointer;font-family:inherit}
+    .export-btn:hover{border-color:var(--orange);color:var(--orange)}
     .admin-search{border:1.5px solid var(--gray-200);border-radius:8px;padding:.5rem .85rem;font-size:.88rem;font-family:inherit;outline:none;min-width:200px}
     .admin-search:focus{border-color:var(--orange)}
     .admin-table{width:100%;border-collapse:collapse;font-size:.85rem}
@@ -157,13 +163,21 @@
     .del-btn:hover{background:#fecaca}
     .empty-row td{text-align:center;color:var(--gray-400);padding:2rem}
 
-    /* FORM MODAL */
+    /* QUICK ADD FORM */
+    #quickOverlay .modal-box{max-width:520px}
+    .quick-header{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;padding:1.1rem 1.5rem;display:flex;align-items:center;justify-content:space-between}
+    .quick-header h3{font-size:1rem;font-weight:800}
+    .quick-body{padding:1.5rem;display:flex;flex-direction:column;gap:1rem}
+    .quick-tip{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:.75rem 1rem;font-size:.82rem;color:#166534;line-height:1.5}
+    .quick-tip strong{display:block;margin-bottom:.2rem;font-size:.88rem}
+
+    /* FULL FORM MODAL */
     #formOverlay .modal-box{max-width:680px}
     .form-header{background:var(--orange);color:#fff;padding:1.1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
     .form-header h3{font-size:1rem;font-weight:800}
     .form-body{padding:1.5rem;overflow-y:auto;max-height:calc(90vh - 120px)}
-    .form-section{font-size:.78rem;font-weight:700;color:var(--orange);text-transform:uppercase;letter-spacing:.05em;margin:1.25rem 0 .6rem;border-top:1px solid var(--gray-100);padding-top:1rem}
-    .form-section:first-child{border-top:none;margin-top:0;padding-top:0}
+    .form-section-label{font-size:.78rem;font-weight:700;color:var(--orange);text-transform:uppercase;letter-spacing:.05em;margin:1.25rem 0 .6rem;border-top:1px solid var(--gray-100);padding-top:1rem}
+    .form-section-label:first-child{border-top:none;margin-top:0;padding-top:0}
     .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.85rem}
     .form-group{display:flex;flex-direction:column;gap:.3rem}
     .form-group.full{grid-column:1/-1}
@@ -172,14 +186,13 @@
     .form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--orange)}
     .form-textarea{resize:vertical;min-height:72px}
     .form-hint{font-size:.75rem;color:var(--gray-400)}
-    .img-preview-wrap{margin-top:.5rem}
-    .img-preview{width:100%;max-height:140px;object-fit:cover;border-radius:8px;border:1px solid var(--gray-200);display:none}
+    .img-preview{width:100%;max-height:140px;object-fit:cover;border-radius:8px;border:1px solid var(--gray-200);display:none;margin-top:.5rem}
+    .cloudinary-config{background:#fffbf5;border:1px solid #fed7aa;border-radius:8px;padding:.85rem;margin-bottom:.75rem;font-size:.8rem;color:var(--gray-700)}
+    .cloudinary-config summary{cursor:pointer;font-weight:600;color:var(--orange)}
+    .cloudinary-config input{width:100%;border:1px solid var(--gray-200);border-radius:6px;padding:.4rem .7rem;font-size:.8rem;font-family:inherit;outline:none;margin-top:.35rem}
     .upload-area{border:2px dashed var(--gray-200);border-radius:8px;padding:1.25rem;text-align:center;cursor:pointer;transition:border-color .15s;font-size:.82rem;color:var(--gray-500)}
     .upload-area:hover{border-color:var(--orange);color:var(--orange)}
     .upload-area input{display:none}
-    .cloudinary-config{background:#fffbf5;border:1px solid #fed7aa;border-radius:8px;padding:.85rem;margin-bottom:.75rem;font-size:.8rem;color:var(--gray-700)}
-    .cloudinary-config summary{cursor:pointer;font-weight:600;color:var(--orange);margin-bottom:.5rem}
-    .cloudinary-config input{width:100%;border:1px solid var(--gray-200);border-radius:6px;padding:.4rem .7rem;font-size:.8rem;font-family:inherit;outline:none;margin-top:.35rem}
     .checkbox-row{display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.88rem;font-weight:600}
     .checkbox-row input{width:16px;height:16px;accent-color:var(--orange)}
     .form-footer{padding:1rem 1.5rem;border-top:1px solid var(--gray-100);display:flex;gap:.75rem;justify-content:flex-end;background:#fff}
@@ -187,17 +200,15 @@
     .btn-save{background:var(--orange);color:#fff;border:none;border-radius:8px;padding:.65rem 1.5rem;font-size:.9rem;font-weight:700;cursor:pointer;font-family:inherit}
     .btn-save:hover{background:var(--orange-dark)}
     .upload-spinner{display:none;color:var(--orange);font-size:.82rem;margin-top:.4rem}
+    .link-ok{font-size:.78rem;color:var(--green);margin-top:.25rem}
 
-    /* STEP BOXES */
-    .step-box{display:flex;gap:1rem;margin-bottom:1.25rem;padding:1.1rem;background:#fff;border:1.5px solid var(--gray-200);border-radius:12px}
-    .step-box:focus-within{border-color:var(--orange)}
-    .step-num{width:28px;height:28px;min-width:28px;background:var(--orange);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.82rem;font-weight:800;margin-top:.1rem}
-    .step-content{flex:1;min-width:0}
-    .step-title{font-size:.92rem;font-weight:800;color:var(--gray-900);margin-bottom:.15rem}
-    .step-sub{font-size:.78rem;color:var(--gray-500);margin-bottom:0}
-    .link-input:focus{border-color:var(--orange)}
-    .link-ok{font-size:.78rem;color:var(--green);margin-top:.25rem;display:block}
-    .form-label-sm{font-size:.82rem;font-weight:600;color:var(--gray-700)}
+    /* FLOATING QUICK ADD BUTTON */
+    #floatingAddBtn{position:fixed;bottom:1.5rem;right:1.5rem;z-index:150;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;border:none;border-radius:999px;padding:.75rem 1.5rem;font-size:.95rem;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 20px rgba(34,197,94,.45);display:none;align-items:center;gap:.5rem;transition:transform .15s,box-shadow .15s}
+    #floatingAddBtn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(34,197,94,.55)}
+
+    /* TOAST */
+    #toast{position:fixed;bottom:5rem;left:50%;transform:translateX(-50%) translateY(20px);background:var(--gray-900);color:#fff;padding:.7rem 1.5rem;border-radius:999px;font-size:.9rem;font-weight:600;z-index:9999;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;white-space:nowrap}
+    #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
     @media(max-width:640px){
       .hero h1{font-size:1.7rem}
@@ -215,7 +226,7 @@
 
 <!-- NAV -->
 <nav>
-  <div class="logo" onclick="showPage('home')">
+  <div class="logo" onclick="window.scrollTo({top:0,behavior:'smooth'})">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
     DealsHub
   </div>
@@ -231,7 +242,7 @@
 <!-- HERO -->
 <div class="hero">
   <div class="hero-tag" id="heroTag">รวมสุดยอดดีลเด็ด 2025</div>
-  <h1 id="heroH1">ช้อปคุ้มค่า รวมดีลฮิตจาก<br/><span>Shopee & TikTok</span></h1>
+  <h1 id="heroH1">ช้อปคุ้มค่า รวมดีลฮิตจาก<br/><span>Shopee</span></h1>
   <p id="heroP">อัปเดตโปรโมชั่นและสินค้าขายดีทุกวัน การันตีของแท้ คุ้มชัวร์</p>
   <div class="search-bar">
     <input type="text" id="searchInput" placeholder="ค้นหาสินค้า..." oninput="onSearch()" />
@@ -261,8 +272,17 @@
 </div>
 
 <footer>
-  &copy; 2025 DealsHub Thailand — รวมดีลเด็ดจาก <a href="https://shopee.co.th" target="_blank">Shopee</a> &amp; <a href="https://www.tiktok.com/shop" target="_blank">TikTok Shop</a>
+  &copy; 2025 DealsHub Thailand — รวมดีลเด็ดจาก <a href="https://shopee.co.th" target="_blank">Shopee</a>
 </footer>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- FLOATING QUICK ADD -->
+<button id="floatingAddBtn" onclick="openQuickForm()">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  เพิ่มสินค้าด่วน
+</button>
 
 <!-- PRODUCT DETAIL MODAL -->
 <div class="overlay" id="detailOverlay" onclick="closeOverlayClick(event,'detailOverlay')">
@@ -280,8 +300,8 @@
       </div>
       <div class="modal-btns">
         <button class="modal-btn modal-shopee" id="modalShopee">🛒 ซื้อที่ Shopee</button>
-        <button class="modal-btn modal-tiktok" id="modalTiktok">🎵 ซื้อที่ TikTok Shop</button>
       </div>
+      <button class="modal-copy-btn" id="modalCopyLink">📋 คัดลอกลิงก์ Affiliate เพื่อแชร์</button>
     </div>
   </div>
 </div>
@@ -290,11 +310,11 @@
 <div class="overlay" id="pinOverlay" onclick="closeOverlayClick(event,'pinOverlay')">
   <div class="modal-box">
     <div class="pin-icon">🔐</div>
-    <div class="pin-title" id="pinTitle">Admin Access</div>
-    <div class="pin-sub" id="pinSub">กรอก PIN เพื่อเข้าสู่แผงควบคุม</div>
+    <div class="pin-title">Admin Access</div>
+    <div class="pin-sub">กรอก PIN เพื่อเข้าสู่แผงควบคุม</div>
     <input class="pin-input" type="password" id="pinInput" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPin()" autocomplete="off" />
     <div class="pin-error" id="pinError">PIN ไม่ถูกต้อง ลองอีกครั้ง</div>
-    <button class="pin-submit" onclick="checkPin()" id="pinSubmit">เข้าสู่ระบบ</button>
+    <button class="pin-submit" onclick="checkPin()">เข้าสู่ระบบ</button>
   </div>
 </div>
 
@@ -310,7 +330,15 @@
     <div class="admin-content">
       <div class="admin-stats" id="adminStats"></div>
       <div class="admin-toolbar">
-        <button class="add-btn" onclick="openForm(null)">＋ เพิ่มสินค้าใหม่</button>
+        <div class="admin-toolbar-left">
+          <button class="quick-add-btn" onclick="openQuickFormFromAdmin()">⚡ เพิ่มด่วน (Shopee)</button>
+          <button class="add-btn" onclick="openForm(null)">＋ เพิ่มสินค้าแบบละเอียด</button>
+          <button class="export-btn" onclick="exportJSON()" title="ส่งออกข้อมูลเป็น JSON">💾 Export</button>
+          <label class="export-btn" style="cursor:pointer" title="นำเข้าข้อมูล JSON">
+            📂 Import
+            <input type="file" accept=".json" onchange="importJSON(this)" style="display:none" />
+          </label>
+        </div>
         <input class="admin-search" id="adminSearch" placeholder="ค้นหาสินค้า..." oninput="renderAdminTable()" />
       </div>
       <div style="overflow-x:auto">
@@ -329,7 +357,79 @@
   </div>
 </div>
 
-<!-- PRODUCT FORM -->
+<!-- ⚡ QUICK ADD FORM (Shopee Affiliate — เร็วที่สุด) -->
+<div class="overlay" id="quickOverlay" onclick="closeOverlayClick(event,'quickOverlay')">
+  <div class="modal-box">
+    <div class="quick-header">
+      <h3>⚡ เพิ่มสินค้าด่วน — Shopee Affiliate</h3>
+      <button class="modal-close-btn" style="position:static;background:rgba(255,255,255,.25)" onclick="closeOverlay('quickOverlay')">✕</button>
+    </div>
+    <div class="quick-body">
+      <div class="quick-tip">
+        <strong>วิธีเพิ่มสินค้าง่ายที่สุด (3 ขั้นตอน)</strong>
+        1️⃣ เปิดสินค้าใน Shopee App → กด "แชร์" → เลือก "Affiliate Link" → คัดลอก<br/>
+        2️⃣ วางลิงก์ด้านล่าง แล้วกรอกชื่อสินค้าและราคา<br/>
+        3️⃣ กด "บันทึกสินค้า" — แสดงหน้าเว็บทันที ✅
+      </div>
+
+      <div class="form-group">
+        <label>🛒 ลิงก์ Shopee Affiliate * <span style="font-weight:400;color:var(--gray-400)">(จำเป็น)</span></label>
+        <input class="form-input" id="qShopee" placeholder="https://s.shopee.co.th/..." oninput="onQLinkChange()" />
+        <span class="link-ok" id="qLinkOk" style="display:none">✅ ลิงก์ถูกต้อง</span>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>ชื่อสินค้า (ภาษาไทย) *</label>
+          <input class="form-input" id="qName" placeholder="เช่น หูฟังไร้สาย Pro Max" />
+        </div>
+        <div class="form-group">
+          <label>ราคาขาย (บาท) *</label>
+          <input class="form-input" id="qPrice" type="number" placeholder="เช่น 990" oninput="qAutoDiscount()" />
+        </div>
+        <div class="form-group">
+          <label>ราคาเดิม (บาท)</label>
+          <input class="form-input" id="qOriginal" type="number" placeholder="เช่น 1490 (ถ้ามี)" oninput="qAutoDiscount()" />
+        </div>
+        <div class="form-group">
+          <label>หมวดหมู่</label>
+          <select class="form-select" id="qCat">
+            <option value="electronics">อิเล็กทรอนิกส์</option>
+            <option value="beauty">ความงาม</option>
+            <option value="fashion">แฟชั่น</option>
+            <option value="home">บ้านและครัว</option>
+            <option value="sports">กีฬา</option>
+            <option value="health">สุขภาพ</option>
+            <option value="books">หนังสือ</option>
+            <option value="toys">ของเล่น</option>
+            <option value="other">อื่นๆ</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Badge (เช่น ขายดี, ฮอต)</label>
+          <input class="form-input" id="qBadge" placeholder="เว้นว่างถ้าไม่มี" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>URL รูปภาพ <span style="font-weight:400;color:var(--gray-400)">(วาง URL จาก Shopee หรือเว็บใดก็ได้)</span></label>
+        <input class="form-input" id="qImage" placeholder="https://..." oninput="qPreviewImg()" />
+        <img class="img-preview" id="qImgPreview" src="" alt="" />
+      </div>
+
+      <label class="checkbox-row">
+        <input type="checkbox" id="qFeatured" />
+        ⭐ แสดงในหมวด "ดีลแนะนำห้ามพลาด"
+      </label>
+    </div>
+    <div class="form-footer">
+      <button class="btn-cancel" onclick="closeOverlay('quickOverlay')">ยกเลิก</button>
+      <button class="btn-save" onclick="saveQuickProduct()">⚡ บันทึกสินค้า</button>
+    </div>
+  </div>
+</div>
+
+<!-- FULL PRODUCT FORM -->
 <div class="overlay" id="formOverlay" onclick="closeOverlayClick(event,'formOverlay')">
   <div class="modal-box">
     <div class="form-header">
@@ -339,176 +439,107 @@
     <div class="form-body">
       <input type="hidden" id="fId" />
 
-      <!-- STEP 1: LINKS -->
-      <div class="step-box">
-        <div class="step-num">1</div>
-        <div class="step-content">
-          <div class="step-title">วางลิงก์ Affiliate</div>
-          <div class="step-sub">วางลิงก์จาก Shopee หรือ TikTok Shop — เมื่อลูกค้ากดปุ่มในการ์ดจะพาไปยังร้านค้าโดยตรง</div>
-          <div class="form-grid" style="margin-top:.75rem">
-            <div class="form-group">
-              <label>🛒 ลิงก์ Shopee Affiliate *</label>
-              <input class="form-input link-input" id="fShopee" placeholder="https://s.shopee.co.th/..." oninput="onShopeeLink()" />
-              <span class="link-ok" id="shopeeOk" style="display:none">✅ ลิงก์ถูกต้อง</span>
-            </div>
-            <div class="form-group">
-              <label>🎵 ลิงก์ TikTok Shop (ถ้ามี)</label>
-              <input class="form-input link-input" id="fTiktok" placeholder="https://vt.tiktok.com/..." />
-            </div>
-          </div>
+      <div class="form-section-label">🔗 ลิงก์ Affiliate</div>
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>🛒 ลิงก์ Shopee Affiliate *</label>
+          <input class="form-input" id="fShopee" placeholder="https://s.shopee.co.th/..." oninput="onShopeeLink()" />
+          <span class="link-ok" id="shopeeOk" style="display:none">✅ ลิงก์ถูกต้อง</span>
         </div>
       </div>
 
-      <!-- STEP 2: PRODUCT INFO -->
-      <div class="step-box">
-        <div class="step-num">2</div>
-        <div class="step-content">
-          <div class="step-title">ข้อมูลสินค้า</div>
-          <div class="step-sub">กรอกชื่อที่จะแสดงบนการ์ดสินค้า</div>
-          <div class="form-grid" style="margin-top:.75rem">
-            <div class="form-group">
-              <label>ชื่อสินค้า (ภาษาไทย) *</label>
-              <input class="form-input" id="fNameTh" placeholder="เช่น หูฟังไร้สาย Pro Max" />
-            </div>
-            <div class="form-group">
-              <label>ชื่อสินค้า (English)</label>
-              <input class="form-input" id="fNameEn" placeholder="e.g. Wireless Earbuds Pro Max" />
-            </div>
-            <div class="form-group">
-              <label>หมวดหมู่ *</label>
-              <select class="form-select" id="fCat">
-                <option value="electronics">อิเล็กทรอนิกส์</option>
-                <option value="beauty">ความงาม</option>
-                <option value="fashion">แฟชั่น</option>
-                <option value="home">บ้านและครัว</option>
-                <option value="sports">กีฬา</option>
-                <option value="health">สุขภาพ</option>
-                <option value="books">หนังสือ</option>
-                <option value="toys">ของเล่น</option>
-                <option value="software">โปรแกรม/แอป</option>
-                <option value="affiliate">Affiliate</option>
-                <option value="other">อื่นๆ</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Badge (เช่น ขายดี, ฮอต, ใหม่)</label>
-              <input class="form-input" id="fBadge" placeholder="เว้นว่างถ้าไม่มี" />
-            </div>
-            <div class="form-group full">
-              <label>คำอธิบายสินค้า</label>
-              <textarea class="form-textarea" id="fDescTh" placeholder="รายละเอียดสินค้า..."></textarea>
-            </div>
-          </div>
+      <div class="form-section-label">📦 ข้อมูลสินค้า</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>ชื่อสินค้า (ภาษาไทย) *</label>
+          <input class="form-input" id="fNameTh" placeholder="เช่น หูฟังไร้สาย Pro Max" />
+        </div>
+        <div class="form-group">
+          <label>ชื่อสินค้า (English)</label>
+          <input class="form-input" id="fNameEn" placeholder="e.g. Wireless Earbuds Pro Max" />
+        </div>
+        <div class="form-group">
+          <label>หมวดหมู่ *</label>
+          <select class="form-select" id="fCat">
+            <option value="electronics">อิเล็กทรอนิกส์</option>
+            <option value="beauty">ความงาม</option>
+            <option value="fashion">แฟชั่น</option>
+            <option value="home">บ้านและครัว</option>
+            <option value="sports">กีฬา</option>
+            <option value="health">สุขภาพ</option>
+            <option value="books">หนังสือ</option>
+            <option value="toys">ของเล่น</option>
+            <option value="software">โปรแกรม/แอป</option>
+            <option value="affiliate">Affiliate</option>
+            <option value="other">อื่นๆ</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Badge (เช่น ขายดี, ฮอต, ใหม่)</label>
+          <input class="form-input" id="fBadge" placeholder="เว้นว่างถ้าไม่มี" />
+        </div>
+        <div class="form-group full">
+          <label>คำอธิบายสินค้า</label>
+          <textarea class="form-textarea" id="fDescTh" placeholder="รายละเอียดสินค้า..."></textarea>
         </div>
       </div>
 
-      <!-- STEP 3: PRICE -->
-      <div class="step-box">
-        <div class="step-num">3</div>
-        <div class="step-content">
-          <div class="step-title">ราคา</div>
-          <div class="step-sub">กรอกราคาตามที่ขายบน Shopee/TikTok</div>
-          <div class="form-grid" style="margin-top:.75rem">
-            <div class="form-group">
-              <label>ราคาขาย (บาท) *</label>
-              <input class="form-input" id="fPrice" type="number" placeholder="เช่น 990" oninput="autoDiscount()" />
-            </div>
-            <div class="form-group">
-              <label>ราคาเดิม (บาท)</label>
-              <input class="form-input" id="fOriginal" type="number" placeholder="เช่น 1490" oninput="autoDiscount()" />
-            </div>
-            <div class="form-group">
-              <label>ส่วนลด % <span style="color:var(--gray-400);font-weight:400">(คำนวณอัตโนมัติ)</span></label>
-              <input class="form-input" id="fDiscount" type="number" readonly style="background:var(--gray-50)" />
-            </div>
-            <div class="form-group">
-              <label>Rating (0–5)</label>
-              <input class="form-input" id="fRating" type="number" step="0.1" min="0" max="5" placeholder="เช่น 4.8" />
-            </div>
-          </div>
+      <div class="form-section-label">💰 ราคา</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>ราคาขาย (บาท) *</label>
+          <input class="form-input" id="fPrice" type="number" placeholder="เช่น 990" oninput="autoDiscount()" />
+        </div>
+        <div class="form-group">
+          <label>ราคาเดิม (บาท)</label>
+          <input class="form-input" id="fOriginal" type="number" placeholder="เช่น 1490" oninput="autoDiscount()" />
+        </div>
+        <div class="form-group">
+          <label>ส่วนลด % <span style="color:var(--gray-400);font-weight:400">(อัตโนมัติ)</span></label>
+          <input class="form-input" id="fDiscount" type="number" readonly style="background:var(--gray-50)" />
+        </div>
+        <div class="form-group">
+          <label>Rating (0–5)</label>
+          <input class="form-input" id="fRating" type="number" step="0.1" min="0" max="5" placeholder="เช่น 4.8" />
+        </div>
+        <div class="form-group">
+          <label>จำนวนรีวิว</label>
+          <input class="form-input" id="fReviews" type="number" placeholder="เช่น 1200" />
+        </div>
+        <div class="form-group">
+          <label>ลำดับ (rank)</label>
+          <input class="form-input" id="fRank" type="number" placeholder="1, 2, 3..." />
         </div>
       </div>
 
-      <!-- STEP 4: IMAGE -->
-      <div class="step-box">
-        <div class="step-num">4</div>
-        <div class="step-content">
-          <div class="step-title">รูปภาพ</div>
-          <div class="step-sub">คัดลอก URL รูปจาก Shopee หรืออัปโหลดใหม่</div>
-          <div style="margin-top:.75rem">
-            <label class="form-label-sm">วาง URL รูปภาพ (คัดลอกจากหน้าสินค้า Shopee ได้เลย)</label>
-            <input class="form-input" id="fImageUrl" placeholder="https://down-th.img.susercontent.com/..." oninput="previewImg()" style="margin-top:.3rem" />
-            <div style="text-align:center;color:var(--gray-300);font-size:.8rem;margin:.6rem 0">— หรืออัปโหลดรูปใหม่ —</div>
-            <details class="cloudinary-config" id="cloudinaryConfig">
-              <summary>⚙️ ตั้งค่า Cloudinary ก่อนอัปโหลด</summary>
-              <div style="margin-top:.5rem">
-                <label style="font-size:.78rem;font-weight:600">Cloud Name</label>
-                <input id="cfCloudName" placeholder="your-cloud-name" oninput="saveCloudinaryCfg()" />
-                <label style="font-size:.78rem;font-weight:600;margin-top:.5rem;display:block">Upload Preset</label>
-                <input id="cfPreset" placeholder="your-upload-preset" oninput="saveCloudinaryCfg()" />
-              </div>
-            </details>
-            <div class="upload-area" onclick="document.getElementById('fImageFile').click()" style="margin-top:.5rem">
-              <div>📁 คลิกเพื่ออัปโหลดรูป</div>
-              <div style="font-size:.75rem;margin-top:.2rem">JPG, PNG, WEBP</div>
-              <input type="file" id="fImageFile" accept="image/*" onchange="uploadToCloudinary(this)" />
-            </div>
-            <div class="upload-spinner" id="uploadSpinner">⏳ กำลังอัปโหลด...</div>
-            <div class="img-preview-wrap" style="margin-top:.5rem">
-              <img class="img-preview" id="fImgPreview" src="" alt="" />
-            </div>
-          </div>
-        </div>
+      <div class="form-section-label">🖼️ รูปภาพ</div>
+      <div class="form-group">
+        <label>วาง URL รูปภาพ</label>
+        <input class="form-input" id="fImageUrl" placeholder="https://down-th.img.susercontent.com/..." oninput="previewImg()" />
+        <img class="img-preview" id="fImgPreview" src="" alt="" />
       </div>
-
-      <!-- OPTIONS -->
-      <div style="padding:.25rem 0">
-        <label class="checkbox-row">
-          <input type="checkbox" id="fFeatured" />
-          ⭐ แสดงในหมวด "ดีลแนะนำห้ามพลาด"
-        </label>
-        <div style="margin-top:.75rem;display:flex;gap:.75rem;flex-wrap:wrap">
-          <div class="form-group" style="min-width:120px">
-            <label>จำนวนรีวิว</label>
-            <input class="form-input" id="fReviews" type="number" placeholder="เช่น 1200" />
-          </div>
-          <div class="form-group" style="min-width:100px">
-            <label>ลำดับ (rank)</label>
-            <input class="form-input" id="fRank" type="number" placeholder="1, 2, 3..." />
-          </div>
-        </div>
-      </div>
-
-      <div class="form-section">รูปภาพ</div>
+      <div style="text-align:center;color:var(--gray-400);font-size:.82rem;margin:.5rem 0">— หรืออัปโหลดผ่าน Cloudinary —</div>
       <details class="cloudinary-config" id="cloudinaryConfig">
-        <summary>⚙️ ตั้งค่า Cloudinary (สำหรับอัปโหลดรูป)</summary>
+        <summary>⚙️ ตั้งค่า Cloudinary (ครั้งเดียว)</summary>
         <div style="margin-top:.5rem">
           <label style="font-size:.78rem;font-weight:600">Cloud Name</label>
           <input id="cfCloudName" placeholder="your-cloud-name" oninput="saveCloudinaryCfg()" />
           <label style="font-size:.78rem;font-weight:600;margin-top:.5rem;display:block">Upload Preset</label>
           <input id="cfPreset" placeholder="your-upload-preset" oninput="saveCloudinaryCfg()" />
-          <div style="font-size:.75rem;color:var(--gray-400);margin-top:.35rem">ตั้งค่าครั้งเดียว จำค่าไว้ใน browser อัตโนมัติ</div>
+          <div style="font-size:.75rem;color:var(--gray-400);margin-top:.35rem">ตั้งค่าครั้งเดียว จำค่าใน browser อัตโนมัติ</div>
         </div>
       </details>
-      <div class="form-group">
-        <label>URL รูปภาพ (วางลิงก์โดยตรง)</label>
-        <input class="form-input" id="fImageUrl" placeholder="https://..." oninput="previewImg()" />
-      </div>
-      <div style="text-align:center;color:var(--gray-400);font-size:.82rem;margin:.5rem 0">— หรือ —</div>
-      <div class="upload-area" onclick="document.getElementById('fImageFile').click()">
+      <div class="upload-area" onclick="document.getElementById('fImageFile').click()" style="margin-top:.5rem">
         <div>📁 คลิกเพื่ออัปโหลดรูปไปยัง Cloudinary</div>
         <div style="font-size:.75rem;margin-top:.25rem">รองรับ JPG, PNG, WEBP</div>
         <input type="file" id="fImageFile" accept="image/*" onchange="uploadToCloudinary(this)" />
       </div>
       <div class="upload-spinner" id="uploadSpinner">⏳ กำลังอัปโหลด...</div>
-      <div class="img-preview-wrap">
-        <img class="img-preview" id="fImgPreview" src="" alt="" />
-      </div>
 
-      <div class="form-section">ตัวเลือกเพิ่มเติม</div>
+      <div class="form-section-label">⚙️ ตัวเลือกเพิ่มเติม</div>
       <label class="checkbox-row">
         <input type="checkbox" id="fFeatured" />
-        ⭐ แสดงในหมวด "ดีลแนะนำ"
+        ⭐ แสดงในหมวด "ดีลแนะนำห้ามพลาด"
       </label>
     </div>
     <div class="form-footer">
@@ -525,18 +556,13 @@ const STORAGE_KEY = 'dealshub_products';
 
 // =================== DEFAULT PRODUCTS ===================
 const DEFAULT_PRODUCTS = [
-  {id:1,name_th:'หูฟังไร้สาย Pro Max',name_en:'Wireless Earbuds Pro Max',desc_th:'หูฟังไร้สายคุณภาพสูง ตัดเสียงรบกวนได้ดีเยี่ยม Bluetooth 5.3 แบตอยู่ 8 ชั่วโมง',desc_en:'Premium wireless earbuds with ANC, Bluetooth 5.3, 8-hour battery',category:'electronics',price_thb:76650,original_thb:122150,discount:37,image:'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=400',shopee:'https://shopee.co.th',tiktok:'https://www.tiktok.com/shop',rating:4.8,reviews:1248,featured:true,badge:'ขายดี',rank:1},
-  {id:2,name_th:'ครีมกันแดด SPF50+ PA++++',name_en:'Sunscreen SPF50+ PA++++',desc_th:'ครีมกันแดดสูตรเบา ไม่มัน ปกป้องผิวได้ 12 ชั่วโมง เหมาะกับทุกสภาพผิว',desc_en:'Lightweight sunscreen, no greasy feel, 12-hour protection',category:'beauty',price_thb:10150,original_thb:15750,discount:36,image:'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400',shopee:'https://shopee.co.th',tiktok:'https://www.tiktok.com/shop',rating:4.9,reviews:3421,featured:true,badge:'ฮอต',rank:2},
-  {id:3,name_th:'กระเป๋าสะพายหนังแท้',name_en:'Genuine Leather Shoulder Bag',desc_th:'กระเป๋าหนังแท้คุณภาพพรีเมียม ทนทาน มีช่องเก็บของเยอะ',desc_en:'Premium genuine leather bag, durable, multiple compartments',category:'fashion',price_thb:55650,original_thb:98000,discount:43,image:'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400',shopee:'https://shopee.co.th',tiktok:'https://www.tiktok.com/shop',rating:4.7,reviews:892,featured:true,badge:'ลดพิเศษ',rank:3},
-  {id:4,name_th:'หม้อหุงข้าวอัจฉริยะ 1.8L',name_en:'Smart Rice Cooker 1.8L',desc_th:'หม้อหุงข้าวดิจิทัล ประหยัดไฟ มีโหมดกดหุงล่วงหน้า',desc_en:'Digital rice cooker, energy-saving, timer mode',category:'home',price_thb:31150,original_thb:45150,discount:31,image:'https://images.unsplash.com/photo-1585515320310-259814833e62?w=400',shopee:'https://shopee.co.th',tiktok:'https://www.tiktok.com/shop',rating:4.6,reviews:2156,featured:false,badge:null,rank:4},
-  {id:5,name_th:'รองเท้าวิ่ง Ultra Boost',name_en:'Ultra Boost Running Shoes',desc_th:'รองเท้าวิ่งรองรับแรงกระแทกได้ดี เบา สบาย',desc_en:'High-impact running shoes, lightweight and comfortable',category:'sports',price_thb:101150,original_thb:147000,discount:31,image:'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400',shopee:'https://shopee.co.th',tiktok:'https://www.tiktok.com/shop',rating:4.7,reviews:1567,featured:true,badge:'ยอดนิยม',rank:5},
-  {id:6,name_th:'วิตามินซี 1000mg (30 เม็ด)',name_en:'Vitamin C 1000mg (30 tablets)',desc_th:'วิตามินซีเข้มข้น เสริมภูมิคุ้มกัน ผิวสวย',desc_en:'High-potency Vitamin C, boosts immunity, brightens skin',category:'health',price_thb:6965,original_thb:12250,discount:43,image:'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400',shopee:'https://shopee.co.th',tiktok:'https://www.tiktok.com/shop',rating:4.8,reviews:4892,featured:false,badge:null,rank:6},
-  {id:7,name_th:'สมาร์ทวอทช์ Series 5',name_en:'Smartwatch Series 5',desc_th:'สมาร์ทวอทช์วัดสุขภาพครบครัน กันน้ำ 50m',desc_en:'Full health monitoring smartwatch, 50m water resistant',category:'electronics',price_thb:122150,original_thb:209650,discount:42,image:'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400',shopee:'https://shopee.co.th',tiktok:'https://www.tiktok.com/shop',rating:4.5,reviews:734,featured:true,badge:'ใหม่',rank:7},
-  {id:8,name_th:'ชุดออกกำลังกายผู้หญิง',name_en:'Women Workout Set',desc_th:'ชุดออกกำลังกาย ยืดหยุ่นสูง ระบายอากาศดี แห้งเร็ว',desc_en:'High-stretch workout set, quick-dry fabric',category:'fashion',price_thb:20650,original_thb:34650,discount:40,image:'https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=400',shopee:'https://shopee.co.th',tiktok:'https://www.tiktok.com/shop',rating:4.6,reviews:2345,featured:false,badge:null,rank:8},
-  {id:9,name_th:'เซรั่มไฮยาลูรอน',name_en:'Hyaluronic Serum',desc_th:'เซรั่มบำรุงผิวให้ชุ่มชื้นลึก ลดริ้วรอย ผิวนุ่มเนียนใน 7 วัน',desc_en:'Deep hydrating serum, reduces fine lines in 7 days',category:'beauty',price_thb:15750,original_thb:26250,discount:40,image:'https://images.unsplash.com/photo-1570194065650-d99fb4b38b2e?w=400',shopee:'https://shopee.co.th',tiktok:'https://www.tiktok.com/shop',rating:4.9,reviews:3109,featured:true,badge:'Best Seller',rank:9},
-  {id:10,name_th:'ลำโพง Bluetooth กันน้ำ',name_en:'Waterproof Bluetooth Speaker',desc_th:'ลำโพงบลูทูธกันน้ำ IPX7 แบตอยู่ 12 ชั่วโมง',desc_en:'IPX7 waterproof Bluetooth speaker, 12-hour battery',category:'electronics',price_thb:45150,original_thb:76650,discount:41,image:'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400',shopee:'https://shopee.co.th',tiktok:'https://www.tiktok.com/shop',rating:4.7,reviews:1876,featured:false,badge:null,rank:10},
-  {id:11,name_th:'หนังสือ กฎแห่งการดึงดูด',name_en:'The Law of Attraction',desc_th:'หนังสือพัฒนาตัวเอง เปลี่ยนความคิด เปลี่ยนชีวิต ปกแข็ง 320 หน้า',desc_en:'Self-development book, hardcover 320 pages',category:'books',price_thb:8750,original_thb:12250,discount:29,image:'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400',shopee:'https://shopee.co.th',tiktok:'https://www.tiktok.com/shop',rating:4.4,reviews:567,featured:false,badge:null,rank:11},
-  {id:12,name_th:'ของเล่นตัวต่อ STEM 200 ชิ้น',name_en:'STEM Building Blocks 200pcs',desc_th:'ของเล่นตัวต่อเสริมพัฒนาการ เหมาะสำหรับเด็ก 3+',desc_en:'STEM building blocks for developmental learning, age 3+',category:'toys',price_thb:13650,original_thb:22750,discount:40,image:'https://images.unsplash.com/photo-1558060370-d644479cb6f7?w=400',shopee:'https://shopee.co.th',tiktok:'https://www.tiktok.com/shop',rating:4.8,reviews:892,featured:false,badge:null,rank:12},
+  {id:1,name_th:'หูฟังไร้สาย Pro Max',name_en:'Wireless Earbuds Pro Max',desc_th:'หูฟังไร้สายคุณภาพสูง ตัดเสียงรบกวน Bluetooth 5.3 แบตอยู่ 8 ชั่วโมง',category:'electronics',price_thb:769,original_thb:1290,discount:40,image:'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=400',shopee:'https://shopee.co.th',rating:4.8,reviews:1248,featured:true,badge:'ขายดี',rank:1},
+  {id:2,name_th:'ครีมกันแดด SPF50+ PA++++',name_en:'Sunscreen SPF50+',desc_th:'ครีมกันแดดสูตรเบา ไม่มัน ปกป้องผิว 12 ชั่วโมง',category:'beauty',price_thb:189,original_thb:290,discount:35,image:'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400',shopee:'https://shopee.co.th',rating:4.9,reviews:3421,featured:true,badge:'ฮอต',rank:2},
+  {id:3,name_th:'กระเป๋าสะพายหนังแท้',name_en:'Genuine Leather Bag',desc_th:'กระเป๋าหนังแท้คุณภาพพรีเมียม ทนทาน มีช่องเยอะ',category:'fashion',price_thb:590,original_thb:980,discount:40,image:'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400',shopee:'https://shopee.co.th',rating:4.7,reviews:892,featured:true,badge:'ลดพิเศษ',rank:3},
+  {id:4,name_th:'หม้อหุงข้าวอัจฉริยะ 1.8L',name_en:'Smart Rice Cooker 1.8L',desc_th:'หม้อหุงข้าวดิจิทัล ประหยัดไฟ มีโหมดกดหุงล่วงหน้า',category:'home',price_thb:390,original_thb:590,discount:34,image:'https://images.unsplash.com/photo-1585515320310-259814833e62?w=400',shopee:'https://shopee.co.th',rating:4.6,reviews:2156,featured:false,badge:null,rank:4},
+  {id:5,name_th:'รองเท้าวิ่ง Ultra Boost',name_en:'Ultra Boost Running Shoes',desc_th:'รองเท้าวิ่งรองรับแรงกระแทก เบา สบาย',category:'sports',price_thb:1290,original_thb:1990,discount:35,image:'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400',shopee:'https://shopee.co.th',rating:4.7,reviews:1567,featured:true,badge:'ยอดนิยม',rank:5},
+  {id:6,name_th:'วิตามินซี 1000mg (30 เม็ด)',name_en:'Vitamin C 1000mg',desc_th:'วิตามินซีเข้มข้น เสริมภูมิคุ้มกัน ผิวสวย',category:'health',price_thb:149,original_thb:290,discount:49,image:'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400',shopee:'https://shopee.co.th',rating:4.8,reviews:4892,featured:false,badge:null,rank:6},
+  {id:7,name_th:'สมาร์ทวอทช์ Series 5',name_en:'Smartwatch Series 5',desc_th:'สมาร์ทวอทช์วัดสุขภาพครบครัน กันน้ำ 50m',category:'electronics',price_thb:1490,original_thb:2590,discount:43,image:'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400',shopee:'https://shopee.co.th',rating:4.5,reviews:734,featured:true,badge:'ใหม่',rank:7},
 ];
 
 const CATEGORIES = {
@@ -561,38 +587,44 @@ let adminLoggedIn=false;
 
 // =================== STORAGE ===================
 function loadProducts(){
-  try{
-    const s=localStorage.getItem(STORAGE_KEY);
-    if(s) return JSON.parse(s);
-  }catch(e){}
+  try{const s=localStorage.getItem(STORAGE_KEY);if(s) return JSON.parse(s);}catch(e){}
   const data=JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
   localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
   return data;
 }
-function saveProducts(data){ localStorage.setItem(STORAGE_KEY,JSON.stringify(data)); }
-function getProducts(){ return loadProducts(); }
-function nextId(){ const p=getProducts(); return p.length ? Math.max(...p.map(x=>x.id))+1 : 1; }
+function saveProducts(data){localStorage.setItem(STORAGE_KEY,JSON.stringify(data));}
+function getProducts(){return loadProducts();}
+function nextId(){const p=getProducts();return p.length?Math.max(...p.map(x=>x.id))+1:1;}
+
+// =================== TOAST ===================
+let toastTimer;
+function showToast(msg,duration=2500){
+  const el=document.getElementById('toast');
+  el.textContent=msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove('show'),duration);
+}
 
 // =================== LANG ===================
 const T={
   heroTag:{th:'รวมสุดยอดดีลเด็ด 2025',en:'Best Deals of 2025'},
-  heroH1:{th:'ช้อปคุ้มค่า รวมดีลฮิตจาก<br/><span>Shopee & TikTok</span>',en:'Smart Shopping, Hot Deals from<br/><span>Shopee & TikTok</span>'},
+  heroH1:{th:'ช้อปคุ้มค่า รวมดีลฮิตจาก<br/><span>Shopee</span>',en:'Smart Shopping, Hot Deals from<br/><span>Shopee</span>'},
   heroP:{th:'อัปเดตโปรโมชั่นและสินค้าขายดีทุกวัน การันตีของแท้ คุ้มชัวร์',en:'Daily deals & top-selling products — quality guaranteed'},
   searchPH:{th:'ค้นหาสินค้า...',en:'Search products...'},
   searchBtn:{th:'ค้นหา',en:'Search'},
   featuredTitle:{th:'ดีลแนะนำห้ามพลาด',en:'Featured Deals'},
   allTitle:{th:'สินค้าทั้งหมด',en:'All Products'},
   shopeeBtn:{th:'🛒 ซื้อที่ Shopee',en:'🛒 Buy on Shopee'},
-  tiktokBtn:{th:'🎵 ซื้อที่ TikTok',en:'🎵 Buy on TikTok'},
   reviews:{th:'รีวิว',en:'reviews'},
   adminBtn:{th:'ผู้ดูแลระบบ',en:'Admin'},
 };
-function t(k){ return T[k]?.[lang]??k; }
-function pName(p){ return lang==='th'?p.name_th:p.name_en; }
-function pDesc(p){ return lang==='th'?(p.desc_th||p.desc_en||''):(p.desc_en||p.desc_th||''); }
-function catLabel(c){ return lang==='th'?(CATEGORIES[c]?.th??c):(CATEGORIES[c]?.en??c); }
-function fmtPrice(n){ return '฿'+Number(n).toLocaleString('th-TH'); }
-function stars(r){ const n=Math.round(r||0); return '★'.repeat(n)+'☆'.repeat(5-n); }
+function t(k){return T[k]?.[lang]??k;}
+function pName(p){return lang==='th'?p.name_th:(p.name_en||p.name_th);}
+function pDesc(p){return lang==='th'?(p.desc_th||p.desc_en||''):(p.desc_en||p.desc_th||'');}
+function catLabel(c){return lang==='th'?(CATEGORIES[c]?.th??c):(CATEGORIES[c]?.en??c);}
+function fmtPrice(n){return '฿'+Number(n).toLocaleString('th-TH');}
+function stars(r){const n=Math.round(r||0);return '★'.repeat(n)+'☆'.repeat(5-n);}
 
 function toggleLang(){
   lang=lang==='th'?'en':'th';
@@ -610,12 +642,11 @@ function renderAll(){
   document.getElementById('searchBtn').textContent=t('searchBtn');
   document.getElementById('featuredTitle').textContent=t('featuredTitle');
   document.getElementById('allTitle').textContent=t('allTitle');
-  renderFeatured(); renderCats(); renderProducts();
+  renderFeatured();renderCats();renderProducts();
 }
 
 function renderFeatured(){
-  const p=getProducts();
-  const f=p.filter(x=>x.featured).sort((a,b)=>(a.rank||99)-(b.rank||99)).slice(0,4);
+  const f=getProducts().filter(x=>x.featured).sort((a,b)=>(a.rank||99)-(b.rank||99)).slice(0,4);
   document.getElementById('featuredGrid').innerHTML=f.map(x=>cardHTML(x,true)).join('');
 }
 
@@ -631,7 +662,7 @@ function getFiltered(){
   const q=searchQ.toLowerCase();
   return getProducts().filter(p=>{
     const matchCat=currentCat==='all'||p.category===currentCat;
-    const matchQ=!q||p.name_th.toLowerCase().includes(q)||p.name_en.toLowerCase().includes(q);
+    const matchQ=!q||(p.name_th||'').toLowerCase().includes(q)||(p.name_en||'').toLowerCase().includes(q);
     return matchCat&&matchQ;
   }).sort((a,b)=>(a.rank||99)-(b.rank||99));
 }
@@ -643,7 +674,7 @@ function renderProducts(){
   const slice=filtered.slice((currentPage-1)*PAGE_SIZE,currentPage*PAGE_SIZE);
   document.getElementById('productGrid').innerHTML=slice.map(p=>cardHTML(p,false)).join('');
   document.getElementById('noResults').style.display=filtered.length===0?'block':'none';
-  renderPagination(pages,filtered.length);
+  renderPagination(pages);
 }
 
 function cardHTML(p,isFeatured){
@@ -651,6 +682,7 @@ function cardHTML(p,isFeatured){
   const rank=isFeatured?`<span class="badge-rank">#${p.rank||'-'}</span>`:'';
   const disc=p.discount?`<span class="badge-discount">-${p.discount}%</span>`:'';
   const img=p.image||'https://placehold.co/400x300/f3f4f6/9ca3af?text=No+Image';
+  const shopeeLink=p.shopee||'#';
   return `<div class="card" onclick="openDetail(${p.id})">
     <div class="card-img-wrap">
       <img src="${img}" alt="${pName(p)}" loading="lazy" onerror="this.src='https://placehold.co/400x300/f3f4f6/9ca3af?text=No+Image'" />
@@ -664,14 +696,14 @@ function cardHTML(p,isFeatured){
         ${p.original_thb?`<span class="price-was">${fmtPrice(p.original_thb)}</span>`:''}
       </div>
       <div class="card-btns">
-        <button class="btn-shopee" onclick="event.stopPropagation();openLink('${p.shopee||'#'}')">Shopee</button>
-        <button class="btn-tiktok" onclick="event.stopPropagation();openLink('${p.tiktok||'#'}')">TikTok</button>
+        <button class="btn-shopee" onclick="event.stopPropagation();openLink('${shopeeLink}')">🛒 Shopee</button>
+        <button class="btn-copy" title="คัดลอกลิงก์" onclick="event.stopPropagation();copyLink('${shopeeLink}')">📋</button>
       </div>
     </div>
   </div>`;
 }
 
-function renderPagination(pages,total){
+function renderPagination(pages){
   if(pages<=1){document.getElementById('pagination').innerHTML='';return;}
   let h='';
   for(let i=1;i<=pages;i++) h+=`<button class="page-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
@@ -683,6 +715,12 @@ function setCat(c){currentCat=c;currentPage=1;renderCats();renderProducts();}
 function onSearch(){searchQ=document.getElementById('searchInput').value;currentPage=1;renderProducts();}
 function goPage(n){currentPage=n;renderProducts();window.scrollTo({top:0,behavior:'smooth'});}
 function openLink(url){if(url&&url!=='#')window.open(url,'_blank','noopener');}
+function copyLink(url){
+  if(!url||url==='#'){showToast('❌ ไม่มีลิงก์ Affiliate');return;}
+  navigator.clipboard.writeText(url).then(()=>showToast('📋 คัดลอกลิงก์แล้ว!')).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=url;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);showToast('📋 คัดลอกลิงก์แล้ว!');
+  });
+}
 
 // =================== DETAIL MODAL ===================
 function openDetail(id){
@@ -696,8 +734,7 @@ function openDetail(id){
   document.getElementById('modalPriceWas').textContent=p.original_thb?fmtPrice(p.original_thb):'';
   document.getElementById('modalShopee').textContent=t('shopeeBtn');
   document.getElementById('modalShopee').onclick=()=>openLink(p.shopee);
-  document.getElementById('modalTiktok').textContent=t('tiktokBtn');
-  document.getElementById('modalTiktok').onclick=()=>openLink(p.tiktok);
+  document.getElementById('modalCopyLink').onclick=()=>copyLink(p.shopee);
   const b=[];
   if(p.discount) b.push(`<span class="modal-badge mb-discount">-${p.discount}%</span>`);
   if(p.badge) b.push(`<span class="modal-badge mb-label">${p.badge}</span>`);
@@ -720,6 +757,7 @@ function checkPin(){
     closeOverlay('pinOverlay');
     openOverlay('adminOverlay');
     renderAdminPanel();
+    document.getElementById('floatingAddBtn').style.display='flex';
   } else {
     document.getElementById('pinError').style.display='block';
     document.getElementById('pinInput').value='';
@@ -743,9 +781,9 @@ function renderAdminStats(){
 
 function renderAdminTable(){
   const q=(document.getElementById('adminSearch')?.value||'').toLowerCase();
-  const p=getProducts().filter(x=>!q||x.name_th.toLowerCase().includes(q)||x.name_en.toLowerCase().includes(q));
+  const p=getProducts().filter(x=>!q||(x.name_th||'').toLowerCase().includes(q)||(x.name_en||'').toLowerCase().includes(q));
   if(!p.length){
-    document.getElementById('adminTableBody').innerHTML=`<tr class="empty-row"><td colspan="8">ยังไม่มีสินค้า — กด "เพิ่มสินค้าใหม่"</td></tr>`;
+    document.getElementById('adminTableBody').innerHTML=`<tr class="empty-row"><td colspan="8">ยังไม่มีสินค้า — กด "เพิ่มด่วน (Shopee)"</td></tr>`;
     return;
   }
   document.getElementById('adminTableBody').innerHTML=p.map(x=>`
@@ -764,88 +802,121 @@ function renderAdminTable(){
     </tr>`).join('');
 }
 
-// =================== PRODUCT FORM ===================
-
-function onShopeeLink(){
-  const v = document.getElementById('fShopee').value.trim();
-  const ok = document.getElementById('shopeeOk');
-  ok.style.display = (v && (v.startsWith('http://') || v.startsWith('https://'))) ? 'block' : 'none';
+// =================== QUICK ADD FORM ===================
+function openQuickForm(){
+  ['qShopee','qName','qPrice','qOriginal','qBadge','qImage'].forEach(id=>{
+    const el=document.getElementById(id);if(el) el.value='';
+  });
+  document.getElementById('qFeatured').checked=false;
+  document.getElementById('qLinkOk').style.display='none';
+  document.getElementById('qImgPreview').style.display='none';
+  openOverlay('quickOverlay');
+  setTimeout(()=>document.getElementById('qShopee').focus(),100);
+}
+function openQuickFormFromAdmin(){
+  closeOverlay('adminOverlay');
+  openQuickForm();
+}
+function onQLinkChange(){
+  const v=document.getElementById('qShopee').value.trim();
+  document.getElementById('qLinkOk').style.display=(v&&(v.startsWith('http://')||v.startsWith('https://')))?'block':'none';
+}
+function qAutoDiscount(){
+  const p=parseFloat(document.getElementById('qPrice').value)||0;
+  const o=parseFloat(document.getElementById('qOriginal').value)||0;
+}
+function qPreviewImg(){
+  const url=document.getElementById('qImage').value;
+  const img=document.getElementById('qImgPreview');
+  if(url){img.src=url;img.style.display='block';}else img.style.display='none';
+}
+function saveQuickProduct(){
+  const shopee=document.getElementById('qShopee').value.trim();
+  const name=document.getElementById('qName').value.trim();
+  const price=parseFloat(document.getElementById('qPrice').value);
+  if(!shopee){alert('กรุณาวางลิงก์ Shopee Affiliate');document.getElementById('qShopee').focus();return;}
+  if(!name){alert('กรุณากรอกชื่อสินค้า');document.getElementById('qName').focus();return;}
+  if(!price){alert('กรุณากรอกราคาขาย');document.getElementById('qPrice').focus();return;}
+  const original=parseFloat(document.getElementById('qOriginal').value)||null;
+  const discount=original&&original>price?Math.round((original-price)/original*100):null;
+  const products=getProducts();
+  const product={
+    id:nextId(),
+    name_th:name,name_en:'',desc_th:'',
+    category:document.getElementById('qCat').value,
+    badge:document.getElementById('qBadge').value.trim()||null,
+    price_thb:price,original_thb:original,discount,
+    rating:null,reviews:0,
+    rank:products.length+1,
+    shopee,tiktok:null,
+    image:document.getElementById('qImage').value.trim()||null,
+    featured:document.getElementById('qFeatured').checked,
+  };
+  products.push(product);
+  saveProducts(products);
+  closeOverlay('quickOverlay');
+  renderAll();
+  showToast('✅ เพิ่มสินค้า "'+name+'" แล้ว!');
 }
 
+// =================== FULL PRODUCT FORM ===================
+function onShopeeLink(){
+  const v=document.getElementById('fShopee').value.trim();
+  document.getElementById('shopeeOk').style.display=(v&&(v.startsWith('http://')||v.startsWith('https://')))?'block':'none';
+}
 function autoDiscount(){
   const p=parseFloat(document.getElementById('fPrice').value)||0;
   const o=parseFloat(document.getElementById('fOriginal').value)||0;
   if(p&&o&&o>p) document.getElementById('fDiscount').value=Math.round((o-p)/o*100);
   else document.getElementById('fDiscount').value='';
 }
-
 function previewImg(){
   const url=document.getElementById('fImageUrl').value;
   const img=document.getElementById('fImgPreview');
-  if(url){img.src=url;img.style.display='block';}
-  else img.style.display='none';
+  if(url){img.src=url;img.style.display='block';}else img.style.display='none';
 }
-
 function saveCloudinaryCfg(){
   localStorage.setItem('cf_cloud',document.getElementById('cfCloudName').value);
   localStorage.setItem('cf_preset',document.getElementById('cfPreset').value);
 }
-
 function loadCloudinaryCfg(){
-  const cn=localStorage.getItem('cf_cloud')||'';
-  const pr=localStorage.getItem('cf_preset')||'';
-  document.getElementById('cfCloudName').value=cn;
-  document.getElementById('cfPreset').value=pr;
+  document.getElementById('cfCloudName').value=localStorage.getItem('cf_cloud')||'';
+  document.getElementById('cfPreset').value=localStorage.getItem('cf_preset')||'';
 }
-
 async function uploadToCloudinary(input){
-  const file=input.files[0];
-  if(!file) return;
+  const file=input.files[0];if(!file) return;
   const cloud=document.getElementById('cfCloudName').value.trim();
   const preset=document.getElementById('cfPreset').value.trim();
   if(!cloud||!preset){
-    alert('กรุณาตั้งค่า Cloudinary Cloud Name และ Upload Preset ก่อนอัปโหลดรูป');
-    document.getElementById('cloudinaryConfig').open=true;
-    return;
+    alert('กรุณาตั้งค่า Cloudinary Cloud Name และ Upload Preset ก่อนอัปโหลด');
+    document.getElementById('cloudinaryConfig').open=true;return;
   }
   document.getElementById('uploadSpinner').style.display='block';
   try{
-    const fd=new FormData();
-    fd.append('file',file);
-    fd.append('upload_preset',preset);
+    const fd=new FormData();fd.append('file',file);fd.append('upload_preset',preset);
     const res=await fetch(`https://api.cloudinary.com/v1_1/${cloud}/image/upload`,{method:'POST',body:fd});
     const data=await res.json();
-    if(data.secure_url){
-      document.getElementById('fImageUrl').value=data.secure_url;
-      previewImg();
-    } else {
-      alert('อัปโหลดไม่สำเร็จ: '+(data.error?.message||'Unknown error'));
-    }
-  }catch(e){
-    alert('อัปโหลดไม่สำเร็จ: '+e.message);
-  }
+    if(data.secure_url){document.getElementById('fImageUrl').value=data.secure_url;previewImg();}
+    else alert('อัปโหลดไม่สำเร็จ: '+(data.error?.message||'Unknown error'));
+  }catch(e){alert('อัปโหลดไม่สำเร็จ: '+e.message);}
   document.getElementById('uploadSpinner').style.display='none';
   input.value='';
 }
-
 function openForm(id){
   loadCloudinaryCfg();
-  const fields=['fId','fNameTh','fNameEn','fDescTh','fCat','fBadge','fPrice','fOriginal','fDiscount','fRating','fReviews','fRank','fShopee','fTiktok','fImageUrl','fFeatured'];
-  fields.forEach(f=>{
-    const el=document.getElementById(f);
-    if(el) el.type==='checkbox'?el.checked=false:el.value='';
+  ['fId','fNameTh','fNameEn','fDescTh','fBadge','fPrice','fOriginal','fDiscount','fRating','fReviews','fRank','fShopee','fImageUrl'].forEach(f=>{
+    const el=document.getElementById(f);if(el) el.value='';
   });
+  document.getElementById('fFeatured').checked=false;
   document.getElementById('fImgPreview').style.display='none';
-  document.getElementById('fImgPreview').src='';
-
+  document.getElementById('shopeeOk').style.display='none';
   if(id){
-    const p=getProducts().find(x=>x.id===id);
-    if(!p) return;
+    const p=getProducts().find(x=>x.id===id);if(!p) return;
     document.getElementById('formTitle').textContent='แก้ไขสินค้า';
     document.getElementById('fId').value=p.id;
     document.getElementById('fNameTh').value=p.name_th||'';
     document.getElementById('fNameEn').value=p.name_en||'';
-    document.getElementById('fDescTh').value=p.desc_th||p.desc_en||'';
+    document.getElementById('fDescTh').value=p.desc_th||'';
     document.getElementById('fCat').value=p.category||'other';
     document.getElementById('fBadge').value=p.badge||'';
     document.getElementById('fPrice').value=p.price_thb||'';
@@ -855,22 +926,20 @@ function openForm(id){
     document.getElementById('fReviews').value=p.reviews||'';
     document.getElementById('fRank').value=p.rank||'';
     document.getElementById('fShopee').value=p.shopee||'';
-    document.getElementById('fTiktok').value=p.tiktok||'';
     document.getElementById('fImageUrl').value=p.image||'';
     document.getElementById('fFeatured').checked=!!p.featured;
     if(p.image){document.getElementById('fImgPreview').src=p.image;document.getElementById('fImgPreview').style.display='block';}
+    if(p.shopee) document.getElementById('shopeeOk').style.display='block';
   } else {
     document.getElementById('formTitle').textContent='เพิ่มสินค้าใหม่';
   }
   openOverlay('formOverlay');
 }
-
 function saveProduct(){
   const name=document.getElementById('fNameTh').value.trim();
   const price=parseFloat(document.getElementById('fPrice').value);
   if(!name){alert('กรุณากรอกชื่อสินค้าภาษาไทย');return;}
   if(!price){alert('กรุณากรอกราคาขาย');return;}
-
   const idVal=document.getElementById('fId').value;
   const products=getProducts();
   const product={
@@ -888,44 +957,57 @@ function saveProduct(){
     reviews:parseInt(document.getElementById('fReviews').value)||0,
     rank:parseInt(document.getElementById('fRank').value)||null,
     shopee:document.getElementById('fShopee').value.trim()||null,
-    tiktok:document.getElementById('fTiktok').value.trim()||null,
+    tiktok:null,
     image:document.getElementById('fImageUrl').value.trim()||null,
     featured:document.getElementById('fFeatured').checked,
   };
-
-  if(idVal){
-    const idx=products.findIndex(x=>x.id===product.id);
-    if(idx!==-1) products[idx]=product;
-  } else {
-    products.push(product);
-  }
+  if(idVal){const idx=products.findIndex(x=>x.id===product.id);if(idx!==-1) products[idx]=product;}
+  else products.push(product);
   saveProducts(products);
   closeOverlay('formOverlay');
   renderAdminPanel();
   renderAll();
+  showToast('✅ บันทึกสินค้าสำเร็จ!');
 }
-
 function deleteProduct(id){
   if(!confirm('ลบสินค้านี้ออกจากรายการ?')) return;
-  const products=getProducts().filter(x=>x.id!==id);
-  saveProducts(products);
-  renderAdminPanel();
-  renderAll();
+  saveProducts(getProducts().filter(x=>x.id!==id));
+  renderAdminPanel();renderAll();
+  showToast('🗑 ลบสินค้าแล้ว');
+}
+
+// =================== EXPORT / IMPORT ===================
+function exportJSON(){
+  const data=JSON.stringify(getProducts(),null,2);
+  const a=document.createElement('a');
+  a.href='data:application/json;charset=utf-8,'+encodeURIComponent(data);
+  a.download='dealshub-products.json';
+  a.click();
+  showToast('💾 Export สำเร็จ!');
+}
+function importJSON(input){
+  const file=input.files[0];if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(!Array.isArray(data)){alert('ไฟล์ไม่ถูกต้อง — ต้องเป็น Array ของสินค้า');return;}
+      if(!confirm(`นำเข้า ${data.length} สินค้า? จะแทนที่ข้อมูลเดิมทั้งหมด`)) return;
+      saveProducts(data);renderAdminPanel();renderAll();
+      showToast('📂 Import '+data.length+' สินค้าสำเร็จ!');
+    }catch(err){alert('อ่านไฟล์ไม่ได้: '+err.message);}
+  };
+  reader.readAsText(file);
+  input.value='';
 }
 
 // =================== OVERLAY HELPERS ===================
-function openOverlay(id){
-  document.getElementById(id).classList.add('open');
-  document.body.style.overflow='hidden';
-}
+function openOverlay(id){document.getElementById(id).classList.add('open');document.body.style.overflow='hidden';}
 function closeOverlay(id){
   document.getElementById(id).classList.remove('open');
-  const anyOpen=document.querySelectorAll('.overlay.open').length>0;
-  if(!anyOpen) document.body.style.overflow='';
+  if(!document.querySelectorAll('.overlay.open').length) document.body.style.overflow='';
 }
-function closeOverlayClick(e,id){
-  if(e.target===document.getElementById(id)) closeOverlay(id);
-}
+function closeOverlayClick(e,id){if(e.target===document.getElementById(id)) closeOverlay(id);}
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){
     document.querySelectorAll('.overlay.open').forEach(el=>el.classList.remove('open'));
