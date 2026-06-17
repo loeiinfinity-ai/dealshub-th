@@ -188,6 +188,29 @@
     .btn-save:hover{background:var(--orange-dark)}
     .upload-spinner{display:none;color:var(--orange);font-size:.82rem;margin-top:.4rem}
 
+    /* QUICK IMPORT */
+    .import-box{background:linear-gradient(135deg,#fff7ed,#fff);border:2px solid var(--orange);border-radius:12px;padding:1.25rem 1.25rem 1rem;margin-bottom:1.25rem}
+    .import-box-title{font-size:.92rem;font-weight:800;color:var(--orange);margin-bottom:.15rem;display:flex;align-items:center;gap:.4rem}
+    .import-box-sub{font-size:.78rem;color:var(--gray-500);margin-bottom:.85rem}
+    .import-row{display:flex;gap:.5rem}
+    .import-input{flex:1;border:1.5px solid var(--gray-200);border-radius:8px;padding:.65rem 1rem;font-size:.88rem;font-family:inherit;outline:none;transition:border-color .15s}
+    .import-input:focus{border-color:var(--orange)}
+    .import-btn{background:var(--orange);color:#fff;border:none;border-radius:8px;padding:.65rem 1.1rem;font-size:.88rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background .15s;display:flex;align-items:center;gap:.35rem}
+    .import-btn:hover{background:var(--orange-dark)}
+    .import-btn:disabled{background:var(--gray-300);cursor:not-allowed}
+    .import-status{font-size:.8rem;margin-top:.6rem;min-height:1.2rem;display:flex;align-items:center;gap:.35rem}
+    .import-ok{color:var(--green)}
+    .import-err{color:var(--red)}
+    .import-loading{color:var(--orange)}
+    .import-preview{display:none;margin-top:.85rem;background:#fff;border:1px solid var(--gray-200);border-radius:8px;padding:.75rem;display:none;align-items:center;gap:.85rem}
+    .import-preview.show{display:flex}
+    .import-preview img{width:64px;height:64px;object-fit:cover;border-radius:6px;border:1px solid var(--gray-200);flex-shrink:0}
+    .import-preview-info{flex:1;min-width:0}
+    .import-preview-name{font-weight:700;font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .import-preview-price{color:var(--orange);font-weight:700;font-size:.85rem;margin-top:.15rem}
+    .divider-or{display:flex;align-items:center;gap:.75rem;color:var(--gray-300);font-size:.8rem;margin:1rem 0}
+    .divider-or::before,.divider-or::after{content:'';flex:1;border-top:1px solid var(--gray-200)}
+
     @media(max-width:640px){
       .hero h1{font-size:1.7rem}
       .featured-grid,.product-grid{grid-template-columns:repeat(2,1fr)}
@@ -327,6 +350,28 @@
     </div>
     <div class="form-body">
       <input type="hidden" id="fId" />
+
+      <!-- QUICK IMPORT -->
+      <div class="import-box">
+        <div class="import-box-title">🔗 นำเข้าจากลิงก์ Shopee อัตโนมัติ</div>
+        <div class="import-box-sub">วางลิงก์ Affiliate Shopee → ระบบดึงชื่อ รูป ราคา ให้อัตโนมัติ เลือกแค่หมวดหมู่</div>
+        <div class="import-row">
+          <input class="import-input" id="importUrl" placeholder="วางลิงก์ Shopee เช่น https://s.shopee.co.th/..." onkeydown="if(event.key==='Enter')fetchShopeeData()" />
+          <button class="import-btn" id="importBtn" onclick="fetchShopeeData()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            ดึงข้อมูล
+          </button>
+        </div>
+        <div class="import-status" id="importStatus"></div>
+        <div class="import-preview" id="importPreview">
+          <img id="importPreviewImg" src="" alt="" onerror="this.style.display='none'" />
+          <div class="import-preview-info">
+            <div class="import-preview-name" id="importPreviewName"></div>
+            <div class="import-preview-price" id="importPreviewPrice"></div>
+          </div>
+        </div>
+      </div>
+      <div class="divider-or">หรือกรอกข้อมูลด้วยตนเอง</div>
 
       <div class="form-section">ข้อมูลสินค้า</div>
       <div class="form-grid">
@@ -694,6 +739,115 @@ function renderAdminTable(){
 }
 
 // =================== PRODUCT FORM ===================
+// =================== SHOPEE AUTO-IMPORT ===================
+async function fetchShopeeData(){
+  const url = document.getElementById('importUrl').value.trim();
+  if(!url){ setImportStatus('err','กรุณาวางลิงก์ Shopee ก่อน'); return; }
+
+  const btn = document.getElementById('importBtn');
+  btn.disabled = true;
+  setImportStatus('loading','⏳ กำลังดึงข้อมูลจาก Shopee...');
+  document.getElementById('importPreview').classList.remove('show');
+
+  try {
+    // Use allorigins proxy to bypass CORS
+    const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
+    const res = await fetch(proxyUrl);
+    const data = await res.json();
+    const html = data.contents || '';
+
+    if(!html){ throw new Error('ไม่สามารถดึงข้อมูลได้'); }
+
+    // Parse with DOMParser
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+
+    const getMeta = (prop) => {
+      const el = doc.querySelector(`meta[property="${prop}"], meta[name="${prop}"]`);
+      return el ? el.getAttribute('content') : '';
+    };
+
+    // Extract fields
+    let title = getMeta('og:title') || doc.title || '';
+    let image = getMeta('og:image') || '';
+    let desc  = getMeta('og:description') || '';
+    let price = 0, originalPrice = 0;
+
+    // Try JSON-LD for price
+    doc.querySelectorAll('script[type="application/ld+json"]').forEach(s => {
+      try {
+        const j = JSON.parse(s.textContent);
+        const offer = j.offers || (Array.isArray(j) && j[0]?.offers);
+        if(offer){
+          const p = offer.price || offer.lowPrice;
+          if(p) price = parseFloat(p);
+        }
+        if(j.name && !title) title = j.name;
+        if(j.image && !image) image = Array.isArray(j.image) ? j.image[0] : j.image;
+      } catch(e){}
+    });
+
+    // Fallback: parse price from meta or text
+    if(!price){
+      const priceMeta = getMeta('product:price:amount') || getMeta('og:price:amount');
+      if(priceMeta) price = parseFloat(priceMeta);
+    }
+    if(!price){
+      // Try to find price pattern in HTML: ฿X,XXX or XX.XX
+      const priceMatch = html.match(/[฿]\s*([\d,]+(?:\.\d{1,2})?)/);
+      if(priceMatch) price = parseFloat(priceMatch[1].replace(/,/g,''));
+      if(!price){
+        const numMatch = html.match(/"price"\s*:\s*"?([\d.]+)"?/);
+        if(numMatch) price = parseFloat(numMatch[1]);
+      }
+    }
+
+    // Clean title — Shopee titles are often "Product | Shopee Thailand"
+    title = title.replace(/\s*[\||\-]\s*Shopee.*$/i,'').replace(/\s*\| Shopee.*$/i,'').trim();
+    // Remove leading/trailing brackets content like "[เก็บโค้ด...]"
+    title = title.replace(/^\[.*?\]\s*/,'').trim();
+
+    if(!title){ throw new Error('ดึงชื่อสินค้าไม่ได้ ลองใช้ลิงก์ตรงจาก Shopee'); }
+
+    // Fill form fields
+    document.getElementById('fNameTh').value = title;
+    document.getElementById('fNameEn').value = title;
+    document.getElementById('fDescTh').value = desc;
+    document.getElementById('fDescEn').value = desc;
+    document.getElementById('fShopee').value = url;
+
+    if(price){
+      document.getElementById('fPrice').value = Math.round(price);
+      autoDiscount();
+    }
+
+    if(image){
+      // Shopee images sometimes use //cf.shopee.co.th — ensure https
+      if(image.startsWith('//')) image = 'https:' + image;
+      document.getElementById('fImageUrl').value = image;
+      const prev = document.getElementById('fImgPreview');
+      prev.src = image; prev.style.display = 'block';
+      document.getElementById('importPreviewImg').src = image;
+    }
+
+    // Show preview
+    document.getElementById('importPreviewName').textContent = title;
+    document.getElementById('importPreviewPrice').textContent = price ? '฿'+Math.round(price).toLocaleString('th-TH') : 'ไม่พบราคา (กรอกเอง)';
+    document.getElementById('importPreview').classList.add('show');
+
+    setImportStatus('ok','✅ ดึงข้อมูลสำเร็จ! เลือกหมวดหมู่แล้วกด "บันทึกสินค้า"');
+  } catch(e) {
+    setImportStatus('err','❌ '+( e.message || 'ดึงข้อมูลไม่สำเร็จ') + ' — ลองวางลิงก์สินค้าตรงๆ จาก Shopee');
+  }
+  btn.disabled = false;
+}
+
+function setImportStatus(type, msg){
+  const el = document.getElementById('importStatus');
+  el.className = 'import-status import-' + type;
+  el.textContent = msg;
+}
+
 function autoDiscount(){
   const p=parseFloat(document.getElementById('fPrice').value)||0;
   const o=parseFloat(document.getElementById('fOriginal').value)||0;
