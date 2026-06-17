@@ -75,8 +75,6 @@
     .price-was{font-size:.78rem;color:var(--gray-300);text-decoration:line-through}
     .card-btns{display:flex;gap:.4rem;margin-top:auto}
     .btn-shopee{flex:1;padding:.45rem .3rem;border:none;border-radius:7px;font-size:.75rem;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity .15s;text-align:center;background:#f97316;color:#fff}
-    .btn-copy{padding:.45rem .5rem;border:1.5px solid var(--gray-200);border-radius:7px;font-size:.75rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;background:#fff;color:var(--gray-500)}
-    .btn-copy:hover{border-color:var(--orange);color:var(--orange)}
     .btn-shopee:hover{opacity:.85}
 
     /* PAGINATION */
@@ -113,8 +111,11 @@
     .modal-btns{display:flex;gap:.75rem}
     .modal-btn{flex:1;padding:.8rem;border:none;border-radius:10px;font-size:.95rem;font-weight:700;cursor:pointer;font-family:inherit}
     .modal-shopee{background:var(--orange);color:#fff}
-    .modal-copy-btn{background:var(--gray-100);color:var(--gray-700);border:none;border-radius:10px;padding:.8rem 1.25rem;font-size:.95rem;font-weight:700;cursor:pointer;font-family:inherit;margin-top:.75rem;width:100%;transition:background .15s}
-    .modal-copy-btn:hover{background:var(--gray-200)}
+    /* fetch status */
+    .fetch-status{font-size:.82rem;margin-top:.4rem;min-height:1.2em}
+    .fetch-loading{color:var(--orange)}
+    .fetch-ok{color:var(--green)}
+    .fetch-err{color:var(--red)}
 
     /* PIN MODAL */
     #pinOverlay .modal-box{max-width:400px;padding:2.5rem 2rem;text-align:center}
@@ -301,7 +302,6 @@
       <div class="modal-btns">
         <button class="modal-btn modal-shopee" id="modalShopee">🛒 ซื้อที่ Shopee</button>
       </div>
-      <button class="modal-copy-btn" id="modalCopyLink">📋 คัดลอกลิงก์ Affiliate เพื่อแชร์</button>
     </div>
   </div>
 </div>
@@ -366,30 +366,34 @@
     </div>
     <div class="quick-body">
       <div class="quick-tip">
-        <strong>วิธีเพิ่มสินค้าง่ายที่สุด (3 ขั้นตอน)</strong>
+        <strong>วิธีใช้งาน — แค่วางลิงก์ ระบบดึงข้อมูลให้อัตโนมัติ</strong>
         1️⃣ เปิดสินค้าใน Shopee App → กด "แชร์" → เลือก "Affiliate Link" → คัดลอก<br/>
-        2️⃣ วางลิงก์ด้านล่าง แล้วกรอกชื่อสินค้าและราคา<br/>
-        3️⃣ กด "บันทึกสินค้า" — แสดงหน้าเว็บทันที ✅
+        2️⃣ วางลิงก์ด้านล่าง — ระบบดึงชื่อ รูป ราคา ให้เอง<br/>
+        3️⃣ ตรวจสอบข้อมูล → กด "บันทึกสินค้า" ✅
       </div>
 
       <div class="form-group">
-        <label>🛒 ลิงก์ Shopee Affiliate * <span style="font-weight:400;color:var(--gray-400)">(จำเป็น)</span></label>
+        <label>🛒 ลิงก์ Shopee Affiliate * <span style="font-weight:400;color:var(--gray-400)">(วางแล้วระบบดึงข้อมูลให้)</span></label>
         <input class="form-input" id="qShopee" placeholder="https://s.shopee.co.th/..." oninput="onQLinkChange()" />
-        <span class="link-ok" id="qLinkOk" style="display:none">✅ ลิงก์ถูกต้อง</span>
+        <div class="fetch-status" id="qFetchStatus"></div>
       </div>
 
       <div class="form-grid">
         <div class="form-group full">
-          <label>ชื่อสินค้า (ภาษาไทย) *</label>
-          <input class="form-input" id="qName" placeholder="เช่น หูฟังไร้สาย Pro Max" />
+          <label>ชื่อสินค้า *</label>
+          <input class="form-input" id="qName" placeholder="ดึงข้อมูลอัตโนมัติจากลิงก์..." />
+        </div>
+        <div class="form-group full">
+          <label>คำอธิบาย</label>
+          <textarea class="form-textarea" id="qDesc" placeholder="ดึงข้อมูลอัตโนมัติจากลิงก์..." style="min-height:56px"></textarea>
         </div>
         <div class="form-group">
           <label>ราคาขาย (บาท) *</label>
-          <input class="form-input" id="qPrice" type="number" placeholder="เช่น 990" oninput="qAutoDiscount()" />
+          <input class="form-input" id="qPrice" type="number" placeholder="เช่น 990" />
         </div>
         <div class="form-group">
           <label>ราคาเดิม (บาท)</label>
-          <input class="form-input" id="qOriginal" type="number" placeholder="เช่น 1490 (ถ้ามี)" oninput="qAutoDiscount()" />
+          <input class="form-input" id="qOriginal" type="number" placeholder="เช่น 1490 (ถ้ามี)" />
         </div>
         <div class="form-group">
           <label>หมวดหมู่</label>
@@ -412,7 +416,7 @@
       </div>
 
       <div class="form-group">
-        <label>URL รูปภาพ <span style="font-weight:400;color:var(--gray-400)">(วาง URL จาก Shopee หรือเว็บใดก็ได้)</span></label>
+        <label>รูปภาพ <span style="font-weight:400;color:var(--gray-400)">(ดึงอัตโนมัติ หรือวาง URL เอง)</span></label>
         <input class="form-input" id="qImage" placeholder="https://..." oninput="qPreviewImg()" />
         <img class="img-preview" id="qImgPreview" src="" alt="" />
       </div>
@@ -696,8 +700,7 @@ function cardHTML(p,isFeatured){
         ${p.original_thb?`<span class="price-was">${fmtPrice(p.original_thb)}</span>`:''}
       </div>
       <div class="card-btns">
-        <button class="btn-shopee" onclick="event.stopPropagation();openLink('${shopeeLink}')">🛒 Shopee</button>
-        <button class="btn-copy" title="คัดลอกลิงก์" onclick="event.stopPropagation();copyLink('${shopeeLink}')">📋</button>
+        <button class="btn-shopee" onclick="event.stopPropagation();openLink('${shopeeLink}')">🛒 ซื้อที่ Shopee</button>
       </div>
     </div>
   </div>`;
@@ -715,12 +718,6 @@ function setCat(c){currentCat=c;currentPage=1;renderCats();renderProducts();}
 function onSearch(){searchQ=document.getElementById('searchInput').value;currentPage=1;renderProducts();}
 function goPage(n){currentPage=n;renderProducts();window.scrollTo({top:0,behavior:'smooth'});}
 function openLink(url){if(url&&url!=='#')window.open(url,'_blank','noopener');}
-function copyLink(url){
-  if(!url||url==='#'){showToast('❌ ไม่มีลิงก์ Affiliate');return;}
-  navigator.clipboard.writeText(url).then(()=>showToast('📋 คัดลอกลิงก์แล้ว!')).catch(()=>{
-    const ta=document.createElement('textarea');ta.value=url;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);showToast('📋 คัดลอกลิงก์แล้ว!');
-  });
-}
 
 // =================== DETAIL MODAL ===================
 function openDetail(id){
@@ -734,7 +731,6 @@ function openDetail(id){
   document.getElementById('modalPriceWas').textContent=p.original_thb?fmtPrice(p.original_thb):'';
   document.getElementById('modalShopee').textContent=t('shopeeBtn');
   document.getElementById('modalShopee').onclick=()=>openLink(p.shopee);
-  document.getElementById('modalCopyLink').onclick=()=>copyLink(p.shopee);
   const b=[];
   if(p.discount) b.push(`<span class="modal-badge mb-discount">-${p.discount}%</span>`);
   if(p.badge) b.push(`<span class="modal-badge mb-label">${p.badge}</span>`);
@@ -802,13 +798,149 @@ function renderAdminTable(){
     </tr>`).join('');
 }
 
+// =================== SHOPEE AUTO-FETCH ===================
+// ดึงข้อมูลสินค้าจากลิงก์ Shopee ผ่าน CORS proxy → parse OG tags + JSON-LD
+let fetchDebounce=null;
+
+function setFetchStatus(elId,type,msg){
+  const el=document.getElementById(elId);
+  if(!el) return;
+  el.className='fetch-status fetch-'+type;
+  el.textContent=msg;
+}
+
+async function fetchShopeeData(url, opts){
+  // opts: { nameId, descId, priceId, imageId, imagePreviewId, statusId }
+  const {nameId,descId,priceId,imageId,imagePreviewId,statusId}=opts;
+  setFetchStatus(statusId,'loading','⏳ กำลังดึงข้อมูลสินค้า...');
+
+  // Try proxy 1: allorigins.win, proxy 2: corsproxy.io as fallback
+  const proxies=[
+    `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+    `https://corsproxy.io/?${encodeURIComponent(url)}`,
+  ];
+
+  let html='';
+  for(const proxyUrl of proxies){
+    try{
+      const res=await fetch(proxyUrl,{signal:AbortSignal.timeout(10000)});
+      if(!res.ok) continue;
+      if(proxyUrl.includes('allorigins')){
+        const j=await res.json();
+        html=j.contents||'';
+      } else {
+        html=await res.text();
+      }
+      if(html.length>500) break;
+    }catch(e){continue;}
+  }
+
+  if(!html){
+    setFetchStatus(statusId,'err','⚠️ ดึงข้อมูลไม่ได้ — กรอกข้อมูลเองได้เลย');
+    return;
+  }
+
+  try{
+    const parser=new DOMParser();
+    const doc=parser.parseFromString(html,'text/html');
+
+    const getMeta=(...props)=>{
+      for(const p of props){
+        const el=doc.querySelector(`meta[property="${p}"]`)||doc.querySelector(`meta[name="${p}"]`);
+        const v=el?.getAttribute('content')||'';
+        if(v) return v;
+      }
+      return '';
+    };
+
+    // ชื่อสินค้า
+    let title=getMeta('og:title','twitter:title');
+    // Shopee มักมี " | Shopee Thailand" ต่อท้าย
+    title=title.replace(/\s*\|.*$/,'').replace(/\s*-\s*Shopee.*$/i,'').trim();
+
+    // รูปภาพ
+    const img=getMeta('og:image','og:image:secure_url','twitter:image');
+
+    // คำอธิบาย
+    let desc=getMeta('og:description','description','twitter:description');
+    desc=desc.replace(/\s*\|.*$/,'').trim();
+
+    // ราคา — ลองหลาย meta และ JSON-LD
+    let price='', origPrice='';
+    const priceMeta=getMeta('product:price:amount','og:price:amount','price');
+    if(priceMeta) price=priceMeta;
+
+    // ลอง JSON-LD
+    if(!price){
+      doc.querySelectorAll('script[type="application/ld+json"]').forEach(s=>{
+        if(price) return;
+        try{
+          const d=JSON.parse(s.textContent);
+          const items=Array.isArray(d)?d:[d];
+          items.forEach(item=>{
+            if(price) return;
+            const offers=item.offers||(item['@type']==='Offer'?item:null);
+            if(offers?.price) price=String(offers.price);
+            if(offers?.highPrice) origPrice=String(offers.highPrice);
+          });
+        }catch(e){}
+      });
+    }
+
+    // ลองหา pattern ราคาใน text เช่น "฿199" หรือ "199.00"
+    if(!price){
+      const m=html.match(/["']price["']\s*:\s*["']?([\d.]+)["']?/);
+      if(m) price=m[1];
+    }
+
+    // ใส่ข้อมูลลงฟอร์ม (ถ้ายังว่างอยู่เท่านั้น — ไม่ทับข้อมูลที่กรอกไปแล้ว)
+    const nameEl=document.getElementById(nameId);
+    if(nameEl&&!nameEl.value.trim()&&title) nameEl.value=title;
+
+    const descEl=document.getElementById(descId);
+    if(descEl&&!descEl.value.trim()&&desc) descEl.value=desc;
+
+    if(price){
+      const priceEl=document.getElementById(priceId);
+      if(priceEl&&!priceEl.value) priceEl.value=parseFloat(price)||'';
+    }
+    if(origPrice){
+      const origEl=document.getElementById('qOriginal');
+      if(origEl&&!origEl.value) origEl.value=parseFloat(origPrice)||'';
+    }
+
+    if(img){
+      const imgUrlEl=document.getElementById(imageId);
+      if(imgUrlEl&&!imgUrlEl.value) imgUrlEl.value=img;
+      const previewEl=document.getElementById(imagePreviewId);
+      if(previewEl){previewEl.src=img;previewEl.style.display='block';}
+    }
+
+    const filled=[];
+    if(title) filled.push('ชื่อ');
+    if(img) filled.push('รูป');
+    if(desc) filled.push('คำอธิบาย');
+    if(price) filled.push('ราคา');
+
+    if(filled.length){
+      setFetchStatus(statusId,'ok',`✅ ดึงข้อมูลสำเร็จ: ${filled.join(', ')} — ตรวจสอบแล้วกดบันทึก`);
+    } else {
+      setFetchStatus(statusId,'err','⚠️ ดึงข้อมูลได้บางส่วน — กรอกชื่อและราคาเพิ่มเติม');
+    }
+  }catch(e){
+    setFetchStatus(statusId,'err','⚠️ ดึงข้อมูลไม่ได้ — กรอกข้อมูลเองได้เลย');
+  }
+}
+
 // =================== QUICK ADD FORM ===================
 function openQuickForm(){
   ['qShopee','qName','qPrice','qOriginal','qBadge','qImage'].forEach(id=>{
     const el=document.getElementById(id);if(el) el.value='';
   });
+  const descEl=document.getElementById('qDesc');if(descEl) descEl.value='';
   document.getElementById('qFeatured').checked=false;
-  document.getElementById('qLinkOk').style.display='none';
+  document.getElementById('qFetchStatus').textContent='';
+  document.getElementById('qFetchStatus').className='fetch-status';
   document.getElementById('qImgPreview').style.display='none';
   openOverlay('quickOverlay');
   setTimeout(()=>document.getElementById('qShopee').focus(),100);
@@ -819,11 +951,18 @@ function openQuickFormFromAdmin(){
 }
 function onQLinkChange(){
   const v=document.getElementById('qShopee').value.trim();
-  document.getElementById('qLinkOk').style.display=(v&&(v.startsWith('http://')||v.startsWith('https://')))?'block':'none';
-}
-function qAutoDiscount(){
-  const p=parseFloat(document.getElementById('qPrice').value)||0;
-  const o=parseFloat(document.getElementById('qOriginal').value)||0;
+  if(!v||!(v.startsWith('http://')||v.startsWith('https://'))){
+    setFetchStatus('qFetchStatus','','');
+    return;
+  }
+  // debounce 800ms หลังหยุดพิมพ์
+  clearTimeout(fetchDebounce);
+  fetchDebounce=setTimeout(()=>{
+    fetchShopeeData(v,{
+      nameId:'qName',descId:'qDesc',priceId:'qPrice',
+      imageId:'qImage',imagePreviewId:'qImgPreview',statusId:'qFetchStatus',
+    });
+  },800);
 }
 function qPreviewImg(){
   const url=document.getElementById('qImage').value;
@@ -839,10 +978,12 @@ function saveQuickProduct(){
   if(!price){alert('กรุณากรอกราคาขาย');document.getElementById('qPrice').focus();return;}
   const original=parseFloat(document.getElementById('qOriginal').value)||null;
   const discount=original&&original>price?Math.round((original-price)/original*100):null;
+  const desc=(document.getElementById('qDesc')?.value||'').trim();
   const products=getProducts();
   const product={
     id:nextId(),
-    name_th:name,name_en:'',desc_th:'',
+    name_th:name,name_en:'',
+    desc_th:desc,desc_en:desc,
     category:document.getElementById('qCat').value,
     badge:document.getElementById('qBadge').value.trim()||null,
     price_thb:price,original_thb:original,discount,
@@ -860,9 +1001,27 @@ function saveQuickProduct(){
 }
 
 // =================== FULL PRODUCT FORM ===================
+let fetchDebounce2=null;
 function onShopeeLink(){
   const v=document.getElementById('fShopee').value.trim();
-  document.getElementById('shopeeOk').style.display=(v&&(v.startsWith('http://')||v.startsWith('https://')))?'block':'none';
+  const ok=document.getElementById('shopeeOk');
+  if(!v||!(v.startsWith('http://')||v.startsWith('https://'))){
+    ok.textContent='';ok.style.display='none';return;
+  }
+  ok.textContent='⏳ กำลังดึงข้อมูล...';ok.style.display='block';ok.style.color='var(--orange)';
+  clearTimeout(fetchDebounce2);
+  fetchDebounce2=setTimeout(async()=>{
+    // reuse fetchShopeeData but map to full-form fields
+    const statusEl=document.getElementById('shopeeOk');
+    setFetchStatus('shopeeOk','loading','⏳ กำลังดึงข้อมูลสินค้า...');
+    // temp opts mapping
+    await fetchShopeeData(v,{
+      nameId:'fNameTh',descId:'fDescTh',priceId:'fPrice',
+      imageId:'fImageUrl',imagePreviewId:'fImgPreview',statusId:'shopeeOk',
+    });
+    // also trigger preview
+    previewImg();
+  },800);
 }
 function autoDiscount(){
   const p=parseFloat(document.getElementById('fPrice').value)||0;
