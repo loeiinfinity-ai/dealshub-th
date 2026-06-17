@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DealsHub Thailand — ช้อปคุ้มค่า รวมดีลฮิต</title>
+  <meta name="description" content="รวมสินค้าขายดีจาก Shopee และ TikTok Shop พร้อมโปรโมชั่นสุดคุ้ม" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --orange: #f97316;
+      --orange-dark: #ea6810;
+      --orange-light: #fff7ed;
+      --yellow: #fbbf24;
+      --green: #22c55e;
+      --red: #ef4444;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-500: #6b7280;
+      --gray-700: #374151;
+      --gray-900: #111827;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Noto Sans Thai', 'Inter', sans-serif;
+      background: var(--gray-50);
+      color: var(--gray-900);
+      min-height: 100vh;
+    }
+
+    /* NAVBAR */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: #fff;
+      border-bottom: 1px solid var(--gray-200);
+      padding: 0 1.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 60px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+    .logo { display: flex; align-items: center; gap: .5rem; font-size: 1.3rem; font-weight: 800; color: var(--orange); text-decoration: none; }
+    .logo svg { width: 28px; height: 28px; }
+    .nav-right { display: flex; align-items: center; gap: .75rem; }
+    .lang-btn {
+      border: 1.5px solid var(--orange);
+      background: none; color: var(--orange);
+      padding: .3rem .8rem; border-radius: 6px;
+      font-size: .85rem; font-weight: 600; cursor: pointer;
+      font-family: inherit;
+      transition: all .15s;
+    }
+    .lang-btn:hover { background: var(--orange); color: #fff; }
+
+    /* HERO */
+    .hero {
+      background: linear-gradient(135deg, #f97316 0%, #fb923c 50%, #f59e0b 100%);
+      padding: 4rem 1.5rem 3.5rem;
+      text-align: center;
+      color: #fff;
+    }
+    .hero-tag {
+      display: inline-block;
+      background: rgba(255,255,255,.22);
+      border: 1px solid rgba(255,255,255,.35);
+      border-radius: 999px;
+      padding: .35rem 1.1rem;
+      font-size: .82rem; font-weight: 600;
+      margin-bottom: 1.25rem;
+      backdrop-filter: blur(4px);
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: .5rem;
+    }
+    .hero h1 span { color: var(--yellow); }
+    .hero p { font-size: 1rem; opacity: .88; margin-bottom: 2rem; }
+    .search-bar {
+      display: flex; max-width: 600px; margin: 0 auto;
+      background: #fff; border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0,0,0,.15);
+    }
+    .search-bar input {
+      flex: 1; border: none; outline: none;
+      padding: .85rem 1.2rem;
+      font-size: .95rem; font-family: inherit;
+      color: var(--gray-900);
+    }
+    .search-bar input::placeholder { color: var(--gray-300); }
+    .search-bar button {
+      background: var(--orange); color: #fff;
+      border: none; cursor: pointer;
+      padding: .85rem 1.5rem;
+      font-size: .95rem; font-weight: 700;
+      font-family: inherit;
+      transition: background .15s;
+    }
+    .search-bar button:hover { background: var(--orange-dark); }
+
+    /* MAIN LAYOUT */
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+
+    /* FEATURED */
+    .section { padding: 2rem 0; }
+    .section-title {
+      display: flex; align-items: center; gap: .5rem;
+      font-size: 1.2rem; font-weight: 800;
+      color: var(--orange);
+      margin-bottom: 1.25rem;
+    }
+    .section-title svg { width: 22px; height: 22px; fill: var(--yellow); }
+
+    .featured-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    /* CATEGORY PILLS */
+    .cats {
+      display: flex; gap: .5rem; flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+    .cat-pill {
+      padding: .4rem 1rem;
+      border-radius: 999px;
+      border: 1.5px solid var(--gray-200);
+      background: #fff;
+      font-size: .85rem; font-weight: 600;
+      cursor: pointer; font-family: inherit;
+      color: var(--gray-700);
+      transition: all .15s;
+    }
+    .cat-pill.active, .cat-pill:hover {
+      background: var(--orange); border-color: var(--orange); color: #fff;
+    }
+
+    /* PRODUCT CARD */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      transition: transform .18s, box-shadow .18s;
+      cursor: pointer;
+      display: flex; flex-direction: column;
+    }
+    .card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,.12); }
+    .card-img-wrap {
+      position: relative;
+      padding-top: 75%;
+      overflow: hidden;
+      background: var(--gray-100);
+    }
+    .card-img-wrap img {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform .3s;
+    }
+    .card:hover .card-img-wrap img { transform: scale(1.05); }
+    .badge-discount {
+      position: absolute; top: .5rem; left: .5rem;
+      background: var(--red); color: #fff;
+      font-size: .72rem; font-weight: 700;
+      padding: .15rem .45rem; border-radius: 5px;
+    }
+    .badge-rank {
+      position: absolute; top: .5rem; right: .5rem;
+      background: rgba(0,0,0,.55); color: #fff;
+      font-size: .72rem; font-weight: 700;
+      padding: .15rem .45rem; border-radius: 5px;
+    }
+    .badge-label {
+      position: absolute; bottom: .5rem; left: .5rem;
+      background: var(--orange); color: #fff;
+      font-size: .7rem; font-weight: 700;
+      padding: .15rem .5rem; border-radius: 4px;
+    }
+    .card-body { padding: .85rem; flex: 1; display: flex; flex-direction: column; }
+    .card-name {
+      font-size: .88rem; font-weight: 600;
+      line-height: 1.4;
+      color: var(--gray-900);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: .5rem;
+    }
+    .card-rating {
+      display: flex; align-items: center; gap: .3rem;
+      font-size: .78rem; color: var(--gray-500);
+      margin-bottom: .5rem;
+    }
+    .stars { color: var(--yellow); }
+    .card-price-row {
+      display: flex; align-items: flex-end; gap: .4rem;
+      margin-bottom: .75rem;
+    }
+    .price-now {
+      font-size: 1.05rem; font-weight: 800; color: var(--orange);
+    }
+    .price-was {
+      font-size: .78rem; color: var(--gray-300);
+      text-decoration: line-through;
+    }
+    .card-btns {
+      display: flex; gap: .4rem; margin-top: auto;
+    }
+    .btn-shopee, .btn-tiktok {
+      flex: 1; padding: .45rem .3rem;
+      border: none; border-radius: 7px;
+      font-size: .75rem; font-weight: 700;
+      cursor: pointer; font-family: inherit;
+      transition: opacity .15s;
+      text-align: center;
+    }
+    .btn-shopee { background: #f97316; color: #fff; }
+    .btn-tiktok { background: #010101; color: #fff; }
+    .btn-shopee:hover, .btn-tiktok:hover { opacity: .85; }
+
+    /* MODAL */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,.5);
+      backdrop-filter: blur(3px);
+      padding: 1rem;
+      overflow-y: auto;
+    }
+    .modal-overlay.open { display: flex; align-items: flex-start; justify-content: center; padding-top: 2rem; }
+    .modal {
+      background: #fff;
+      border-radius: 16px;
+      max-width: 640px; width: 100%;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,.2);
+      animation: modalIn .2s ease;
+    }
+    @keyframes modalIn { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
+    .modal-img { width: 100%; height: 260px; object-fit: cover; }
+    .modal-body { padding: 1.5rem; }
+    .modal-badges { display: flex; gap: .5rem; margin-bottom: .75rem; flex-wrap: wrap; }
+    .modal-badge { padding: .2rem .6rem; border-radius: 5px; font-size: .75rem; font-weight: 700; }
+    .mb-discount { background: #fee2e2; color: var(--red); }
+    .mb-label { background: #fff7ed; color: var(--orange); }
+    .modal-name { font-size: 1.3rem; font-weight: 800; margin-bottom: .4rem; }
+    .modal-rating { color: var(--gray-500); font-size: .85rem; margin-bottom: 1rem; }
+    .modal-desc { font-size: .9rem; line-height: 1.6; color: var(--gray-700); margin-bottom: 1.25rem; }
+    .modal-price-row { display: flex; align-items: center; gap: .75rem; margin-bottom: 1.5rem; }
+    .modal-price-now { font-size: 1.6rem; font-weight: 800; color: var(--orange); }
+    .modal-price-was { font-size: 1rem; color: var(--gray-300); text-decoration: line-through; }
+    .modal-btns { display: flex; gap: .75rem; }
+    .modal-btn {
+      flex: 1; padding: .8rem;
+      border: none; border-radius: 10px;
+      font-size: .95rem; font-weight: 700;
+      cursor: pointer; font-family: inherit;
+    }
+    .modal-shopee { background: var(--orange); color: #fff; }
+    .modal-tiktok { background: #010101; color: #fff; }
+    .modal-close {
+      position: absolute; top: 1rem; right: 1rem;
+      width: 36px; height: 36px;
+      background: rgba(0,0,0,.4); color: #fff;
+      border: none; border-radius: 50%;
+      font-size: 1.1rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .modal-wrap { position: relative; }
+
+    /* PAGINATION */
+    .pagination {
+      display: flex; justify-content: center; gap: .5rem;
+      padding: 1.5rem 0 2rem;
+    }
+    .page-btn {
+      width: 36px; height: 36px;
+      border-radius: 8px; border: 1.5px solid var(--gray-200);
+      background: #fff; font-family: inherit;
+      font-size: .85rem; font-weight: 600;
+      cursor: pointer; color: var(--gray-700);
+      transition: all .15s;
+    }
+    .page-btn.active, .page-btn:hover { background: var(--orange); border-color: var(--orange); color: #fff; }
+
+    /* NO RESULTS */
+    .no-results {
+      text-align: center; padding: 3rem 0;
+      color: var(--gray-500); font-size: 1rem;
+    }
+
+    /* FOOTER */
+    footer {
+      background: var(--gray-900); color: var(--gray-300);
+      text-align: center; padding: 1.5rem;
+      font-size: .82rem; margin-top: 2rem;
+    }
+    footer a { color: var(--orange); text-decoration: none; }
+
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 1.7rem; }
+      .featured-grid, .product-grid { grid-template-columns: repeat(2, 1fr); }
+      .modal-btns { flex-direction: column; }
+    }
+    @media (max-width: 400px) {
+      .featured-grid, .product-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <a class="logo" href="#">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    DealsHub
+  </a>
+  <div class="nav-right">
+    <button class="lang-btn" onclick="toggleLang()" id="langBtn">EN</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag" id="heroTag">รวมสุดยอดดีลเด็ด 2025</div>
+  <h1 id="heroH1">ช้อปคุ้มค่า รวมดีลฮิตจาก<br/><span>Shopee & TikTok</span></h1>
+  <p id="heroP">อัปเดตโปรโมชั่นและสินค้าขายดีทุกวัน การันตีของแท้ คุ้มชัวร์</p>
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="ค้นหาสินค้า (เช่น หูฟัง, กระเป๋า)..." oninput="onSearch()" />
+    <button onclick="onSearch()" id="searchBtn">ค้นหา</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="container">
+
+  <!-- FEATURED -->
+  <div class="section">
+    <div class="section-title">
+      <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      <span id="featuredTitle">ดีลแนะนำห้ามพลาด</span>
+    </div>
+    <div class="featured-grid" id="featuredGrid"></div>
+  </div>
+
+  <!-- ALL PRODUCTS -->
+  <div class="section">
+    <div class="section-title">
+      <svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+      <span id="allTitle">สินค้าทั้งหมด</span>
+    </div>
+    <div class="cats" id="catPills"></div>
+    <div class="product-grid" id="productGrid"></div>
+    <div class="no-results" id="noResults" style="display:none">ไม่พบสินค้าที่ค้นหา</div>
+    <div class="pagination" id="pagination"></div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  &copy; 2025 DealsHub Thailand — รวมดีลเด็ดจาก <a href="https://shopee.co.th" target="_blank">Shopee</a> &amp; <a href="https://www.tiktok.com/shop" target="_blank">TikTok Shop</a>
+</footer>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-wrap">
+      <button class="modal-close" onclick="closeModal(null)">✕</button>
+      <img id="modalImg" class="modal-img" src="" alt="" />
+    </div>
+    <div class="modal-body">
+      <div class="modal-badges" id="modalBadges"></div>
+      <div class="modal-name" id="modalName"></div>
+      <div class="modal-rating" id="modalRating"></div>
+      <div class="modal-desc" id="modalDesc"></div>
+      <div class="modal-price-row">
+        <span class="modal-price-now" id="modalPriceNow"></span>
+        <span class="modal-price-was" id="modalPriceWas"></span>
+      </div>
+      <div class="modal-btns">
+        <button class="modal-btn modal-shopee" id="modalShopee" onclick="">
+          🛒 ซื้อที่ Shopee
+        </button>
+        <button class="modal-btn modal-tiktok" id="modalTiktok" onclick="">
+          🎵 ซื้อที่ TikTok Shop
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// =================== DATA ===================
+const PRODUCTS = [
+  { id:1, name_th:'หูฟังไร้สาย Pro Max', name_en:'Wireless Earbuds Pro Max', desc_th:'หูฟังไร้สายคุณภาพสูง ตัดเสียงรบกวนได้ดีเยี่ยม เชื่อมต่อ Bluetooth 5.3 แบตอยู่ 8 ชั่วโมง', desc_en:'Premium wireless earbuds with active noise cancellation, Bluetooth 5.3, 8-hour battery life', category:'electronics', price_thb:76650, original_thb:122150, discount:37, image:'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=400', shopee:'https://shopee.co.th', tiktok:'https://www.tiktok.com/shop', rating:4.8, reviews:1248, featured:true, badge:'ขายดี', rank:1 },
+  { id:2, name_th:'ครีมกันแดด SPF50+ PA++++', name_en:'Sunscreen SPF50+ PA++++', desc_th:'ครีมกันแดดสูตรเบา ไม่มัน ปกป้องผิวได้ 12 ชั่วโมง เหมาะกับทุกสภาพผิว', desc_en:'Lightweight sunscreen, no greasy feel, 12-hour protection, suitable for all skin types', category:'beauty', price_thb:10150, original_thb:15750, discount:36, image:'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400', shopee:'https://shopee.co.th', tiktok:'https://www.tiktok.com/shop', rating:4.9, reviews:3421, featured:true, badge:'ฮอต', rank:2 },
+  { id:3, name_th:'กระเป๋าสะพายหนังแท้', name_en:'Genuine Leather Shoulder Bag', desc_th:'กระเป๋าหนังแท้คุณภาพพรีเมียม ทนทาน ใช้ได้นาน มีช่องเก็บของเยอะ', desc_en:'Premium genuine leather bag, durable and long-lasting, multiple compartments', category:'fashion', price_thb:55650, original_thb:98000, discount:43, image:'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400', shopee:'https://shopee.co.th', tiktok:'https://www.tiktok.com/shop', rating:4.7, reviews:892, featured:true, badge:'ลดพิเศษ', rank:3 },
+  { id:4, name_th:'หม้อหุงข้าวอัจฉริยะ 1.8L', name_en:'Smart Rice Cooker 1.8L', desc_th:'หม้อหุงข้าวดิจิทัล ประหยัดไฟ หุงข้าวได้นุ่มหอม มีโหมดกดหุงล่วงหน้า', desc_en:'Digital rice cooker, energy-saving, perfectly cooked rice, timer mode included', category:'home', price_thb:31150, original_thb:45150, discount:31, image:'https://images.unsplash.com/photo-1585515320310-259814833e62?w=400', shopee:'https://shopee.co.th', tiktok:'https://www.tiktok.com/shop', rating:4.6, reviews:2156, featured:false, badge:null, rank:4 },
+  { id:5, name_th:'รองเท้าวิ่ง Ultra Boost', name_en:'Ultra Boost Running Shoes', desc_th:'รองเท้าวิ่งรองรับแรงกระแทกได้ดี เบา สบาย เหมาะกับการวิ่งระยะไกล', desc_en:'High-impact running shoes, lightweight and comfortable, great for long-distance running', category:'sports', price_thb:101150, original_thb:147000, discount:31, image:'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400', shopee:'https://shopee.co.th', tiktok:'https://www.tiktok.com/shop', rating:4.7, reviews:1567, featured:true, badge:'ยอดนิยม', rank:5 },
+  { id:6, name_th:'วิตามินซี 1000mg (30 เม็ด)', name_en:'Vitamin C 1000mg (30 tablets)', desc_th:'วิตามินซีเข้มข้น เสริมภูมิคุ้มกัน ผิวสวย ลดอาการเหนื่อยล้า', desc_en:'High-potency Vitamin C, boosts immunity, brightens skin, reduces fatigue', category:'health', price_thb:6965, original_thb:12250, discount:43, image:'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400', shopee:'https://shopee.co.th', tiktok:'https://www.tiktok.com/shop', rating:4.8, reviews:4892, featured:false, badge:null, rank:6 },
+  { id:7, name_th:'สมาร์ทวอทช์ Series 5', name_en:'Smartwatch Series 5', desc_th:'สมาร์ทวอทช์วัดสุขภาพครบครัน กันน้ำ 50m ติดตาม Heart Rate, SpO2, การนอน', desc_en:'Full health monitoring smartwatch, 50m water resistant, tracks heart rate, SpO2, sleep', category:'electronics', price_thb:122150, original_thb:209650, discount:42, image:'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400', shopee:'https://shopee.co.th', tiktok:'https://www.tiktok.com/shop', rating:4.5, reviews:734, featured:true, badge:'ใหม่', rank:7 },
+  { id:8, name_th:'ชุดออกกำลังกายผู้หญิง', name_en:'Women Workout Set', desc_th:'ชุดออกกำลังกาย ยืดหยุ่นสูง ระบายอากาศดี แห้งเร็ว เหมาะทุกกิจกรรม', desc_en:'High-stretch workout set with excellent breathability, quick-dry fabric', category:'fashion', price_thb:20650, original_thb:34650, discount:40, image:'https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=400', shopee:'https://shopee.co.th', tiktok:'https://www.tiktok.com/shop', rating:4.6, reviews:2345, featured:false, badge:null, rank:8 },
+  { id:9, name_th:'เซรั่มไฮยาลูรอน', name_en:'Hyaluronic Serum', desc_th:'เซรั่มบำรุงผิวให้ชุ่มชื้นลึก ลดริ้วรอย ผิวนุ่มเนียนใน 7 วัน', desc_en:'Deep hydrating serum, reduces fine lines, skin becomes smooth in 7 days', category:'beauty', price_thb:15750, original_thb:26250, discount:40, image:'https://images.unsplash.com/photo-1570194065650-d99fb4b38b2e?w=400', shopee:'https://shopee.co.th', tiktok:'https://www.tiktok.com/shop', rating:4.9, reviews:3109, featured:true, badge:'Best Seller', rank:9 },
+  { id:10, name_th:'ลำโพง Bluetooth กันน้ำ', name_en:'Waterproof Bluetooth Speaker', desc_th:'ลำโพงบลูทูธกันน้ำ IPX7 เสียงดัง ชัด กระหึ่ม แบตอยู่ 12 ชั่วโมง', desc_en:'IPX7 waterproof Bluetooth speaker, loud and clear, 12-hour battery', category:'electronics', price_thb:45150, original_thb:76650, discount:41, image:'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400', shopee:'https://shopee.co.th', tiktok:'https://www.tiktok.com/shop', rating:4.7, reviews:1876, featured:false, badge:null, rank:10 },
+  { id:11, name_th:'หนังสือ กฎแห่งการดึงดูด', name_en:'The Law of Attraction', desc_th:'หนังสือพัฒนาตัวเอง เปลี่ยนความคิด เปลี่ยนชีวิต ปกแข็ง 320 หน้า', desc_en:'Self-development book, change your mindset, change your life, hardcover 320 pages', category:'books', price_thb:8750, original_thb:12250, discount:29, image:'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400', shopee:'https://shopee.co.th', tiktok:'https://www.tiktok.com/shop', rating:4.4, reviews:567, featured:false, badge:null, rank:11 },
+  { id:12, name_th:'ของเล่นตัวต่อ STEM 200 ชิ้น', name_en:'STEM Building Blocks 200pcs', desc_th:'ของเล่นตัวต่อเสริมพัฒนาการ เหมาะสำหรับเด็ก 3+ ฝึกความคิดสร้างสรรค์', desc_en:'STEM building blocks for developmental learning, age 3+, fosters creativity', category:'toys', price_thb:13650, original_thb:22750, discount:40, image:'https://images.unsplash.com/photo-1558060370-d644479cb6f7?w=400', shopee:'https://shopee.co.th', tiktok:'https://www.tiktok.com/shop', rating:4.8, reviews:892, featured:false, badge:null, rank:12 },
+];
+
+const CATEGORIES = {
+  all:     { th:'ทั้งหมด',    en:'All' },
+  electronics: { th:'อิเล็กทรอนิกส์', en:'Electronics' },
+  beauty:  { th:'ความงาม',   en:'Beauty' },
+  fashion: { th:'แฟชั่น',    en:'Fashion' },
+  home:    { th:'บ้านและครัว',en:'Home' },
+  sports:  { th:'กีฬา',      en:'Sports' },
+  health:  { th:'สุขภาพ',    en:'Health' },
+  books:   { th:'หนังสือ',   en:'Books' },
+  toys:    { th:'ของเล่น',   en:'Toys' },
+};
+
+// =================== STATE ===================
+let lang = 'th';
+let currentCat = 'all';
+let searchQ = '';
+let currentPage = 1;
+const PAGE_SIZE = 8;
+
+// =================== LANG ===================
+const T = {
+  heroTag:        { th:'รวมสุดยอดดีลเด็ด 2025', en:'Best Deals of 2025' },
+  heroH1:         { th:'ช้อปคุ้มค่า รวมดีลฮิตจาก<br/><span>Shopee & TikTok</span>', en:'Smart Shopping, Hot Deals from<br/><span>Shopee & TikTok</span>' },
+  heroP:          { th:'อัปเดตโปรโมชั่นและสินค้าขายดีทุกวัน การันตีของแท้ คุ้มชัวร์', en:'Daily deals & top-selling products — quality guaranteed' },
+  searchPH:       { th:'ค้นหาสินค้า (เช่น หูฟัง, กระเป๋า)...', en:'Search products (e.g. earbuds, bag)...' },
+  searchBtn:      { th:'ค้นหา', en:'Search' },
+  featuredTitle:  { th:'ดีลแนะนำห้ามพลาด', en:'Featured Deals' },
+  allTitle:       { th:'สินค้าทั้งหมด', en:'All Products' },
+  shopeeBtn:      { th:'🛒 ซื้อที่ Shopee', en:'🛒 Buy on Shopee' },
+  tiktokBtn:      { th:'🎵 ซื้อที่ TikTok Shop', en:'🎵 Buy on TikTok' },
+  noResults:      { th:'ไม่พบสินค้าที่ค้นหา', en:'No products found' },
+  reviews:        { th:'รีวิว', en:'reviews' },
+};
+
+function t(key) { return T[key]?.[lang] ?? key; }
+function pName(p) { return lang==='th' ? p.name_th : p.name_en; }
+function pDesc(p) { return lang==='th' ? p.desc_th : p.desc_en; }
+function catLabel(c) { return lang==='th' ? (CATEGORIES[c]?.th ?? c) : (CATEGORIES[c]?.en ?? c); }
+function fmtPrice(n) { return '฿' + n.toLocaleString('th-TH'); }
+function stars(r) { return '★'.repeat(Math.round(r)) + '☆'.repeat(5-Math.round(r)); }
+
+function toggleLang() {
+  lang = lang==='th' ? 'en' : 'th';
+  document.getElementById('langBtn').textContent = lang==='th' ? 'EN' : 'TH';
+  renderAll();
+}
+
+// =================== RENDER ===================
+function renderAll() {
+  document.getElementById('heroTag').textContent = t('heroTag');
+  document.getElementById('heroH1').innerHTML = t('heroH1');
+  document.getElementById('heroP').textContent = t('heroP');
+  document.getElementById('searchInput').placeholder = t('searchPH');
+  document.getElementById('searchBtn').textContent = t('searchBtn');
+  document.getElementById('featuredTitle').textContent = t('featuredTitle');
+  document.getElementById('allTitle').textContent = t('allTitle');
+  document.getElementById('noResults').textContent = t('noResults');
+  renderFeatured();
+  renderCats();
+  renderProducts();
+}
+
+function renderFeatured() {
+  const featured = PRODUCTS.filter(p => p.featured).slice(0, 4);
+  document.getElementById('featuredGrid').innerHTML = featured.map(p => cardHTML(p, true)).join('');
+}
+
+function renderCats() {
+  const cats = ['all', ...Object.keys(CATEGORIES).filter(k => k !== 'all')];
+  document.getElementById('catPills').innerHTML = cats.map(c =>
+    `<button class="cat-pill ${currentCat===c?'active':''}" onclick="setCat('${c}')">${catLabel(c)}</button>`
+  ).join('');
+}
+
+function getFiltered() {
+  return PRODUCTS.filter(p => {
+    const matchCat = currentCat === 'all' || p.category === currentCat;
+    const q = searchQ.toLowerCase();
+    const matchQ = !q || p.name_th.toLowerCase().includes(q) || p.name_en.toLowerCase().includes(q) || p.category.includes(q);
+    return matchCat && matchQ;
+  });
+}
+
+function renderProducts() {
+  const filtered = getFiltered();
+  const total = filtered.length;
+  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  if (currentPage > pages) currentPage = 1;
+  const slice = filtered.slice((currentPage-1)*PAGE_SIZE, currentPage*PAGE_SIZE);
+
+  document.getElementById('productGrid').innerHTML = slice.map(p => cardHTML(p, false)).join('');
+  document.getElementById('noResults').style.display = total === 0 ? 'block' : 'none';
+  renderPagination(pages);
+}
+
+function cardHTML(p, isFeatured) {
+  const badge = p.badge ? `<span class="badge-label">${p.badge}</span>` : '';
+  const rank = isFeatured ? `<span class="badge-rank">#${p.rank}</span>` : '';
+  return `
+    <div class="card" onclick="openModal(${p.id})">
+      <div class="card-img-wrap">
+        <img src="${p.image}" alt="${pName(p)}" loading="lazy" onerror="this.src='https://placehold.co/400x300/f3f4f6/9ca3af?text=No+Image'" />
+        <span class="badge-discount">-${p.discount}%</span>
+        ${rank}
+        ${badge}
+      </div>
+      <div class="card-body">
+        <div class="card-name">${pName(p)}</div>
+        <div class="card-rating">
+          <span class="stars">${stars(p.rating)}</span>
+          ${p.rating} (${p.reviews.toLocaleString()} ${t('reviews')})
+        </div>
+        <div class="card-price-row">
+          <span class="price-now">${fmtPrice(p.price_thb)}</span>
+          <span class="price-was">${fmtPrice(p.original_thb)}</span>
+        </div>
+        <div class="card-btns">
+          <button class="btn-shopee" onclick="event.stopPropagation();openLink('${p.shopee}')">Shopee</button>
+          <button class="btn-tiktok" onclick="event.stopPropagation();openLink('${p.tiktok}')">TikTok</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderPagination(pages) {
+  if (pages <= 1) { document.getElementById('pagination').innerHTML = ''; return; }
+  let html = '';
+  for (let i = 1; i <= pages; i++) {
+    html += `<button class="page-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
+  }
+  document.getElementById('pagination').innerHTML = html;
+}
+
+// =================== ACTIONS ===================
+function setCat(c) { currentCat = c; currentPage = 1; renderCats(); renderProducts(); }
+function onSearch() { searchQ = document.getElementById('searchInput').value; currentPage = 1; renderProducts(); }
+function goPage(n) { currentPage = n; renderProducts(); window.scrollTo({top:0, behavior:'smooth'}); }
+function openLink(url) { window.open(url, '_blank', 'noopener'); }
+
+function openModal(id) {
+  const p = PRODUCTS.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('modalImg').src = p.image;
+  document.getElementById('modalImg').alt = pName(p);
+  document.getElementById('modalName').textContent = pName(p);
+  document.getElementById('modalRating').innerHTML = `<span class="stars">${stars(p.rating)}</span> ${p.rating} &nbsp;|&nbsp; ${p.reviews.toLocaleString()} ${t('reviews')}`;
+  document.getElementById('modalDesc').textContent = pDesc(p);
+  document.getElementById('modalPriceNow').textContent = fmtPrice(p.price_thb);
+  document.getElementById('modalPriceWas').textContent = fmtPrice(p.original_thb);
+  document.getElementById('modalShopee').textContent = t('shopeeBtn');
+  document.getElementById('modalShopee').onclick = () => openLink(p.shopee);
+  document.getElementById('modalTiktok').textContent = t('tiktokBtn');
+  document.getElementById('modalTiktok').onclick = () => openLink(p.tiktok);
+  const badges = [];
+  if (p.discount) badges.push(`<span class="modal-badge mb-discount">-${p.discount}%</span>`);
+  if (p.badge) badges.push(`<span class="modal-badge mb-label">${p.badge}</span>`);
+  document.getElementById('modalBadges').innerHTML = badges.join('');
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modalOverlay') && e.target.className !== 'modal-close') return;
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(null); });
+
+// =================== INIT ===================
+renderAll();
+</script>
+</body>
+</html>
