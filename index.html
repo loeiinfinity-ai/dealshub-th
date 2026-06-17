@@ -188,28 +188,16 @@
     .btn-save:hover{background:var(--orange-dark)}
     .upload-spinner{display:none;color:var(--orange);font-size:.82rem;margin-top:.4rem}
 
-    /* QUICK IMPORT */
-    .import-box{background:linear-gradient(135deg,#fff7ed,#fff);border:2px solid var(--orange);border-radius:12px;padding:1.25rem 1.25rem 1rem;margin-bottom:1.25rem}
-    .import-box-title{font-size:.92rem;font-weight:800;color:var(--orange);margin-bottom:.15rem;display:flex;align-items:center;gap:.4rem}
-    .import-box-sub{font-size:.78rem;color:var(--gray-500);margin-bottom:.85rem}
-    .import-row{display:flex;gap:.5rem}
-    .import-input{flex:1;border:1.5px solid var(--gray-200);border-radius:8px;padding:.65rem 1rem;font-size:.88rem;font-family:inherit;outline:none;transition:border-color .15s}
-    .import-input:focus{border-color:var(--orange)}
-    .import-btn{background:var(--orange);color:#fff;border:none;border-radius:8px;padding:.65rem 1.1rem;font-size:.88rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background .15s;display:flex;align-items:center;gap:.35rem}
-    .import-btn:hover{background:var(--orange-dark)}
-    .import-btn:disabled{background:var(--gray-300);cursor:not-allowed}
-    .import-status{font-size:.8rem;margin-top:.6rem;min-height:1.2rem;display:flex;align-items:center;gap:.35rem}
-    .import-ok{color:var(--green)}
-    .import-err{color:var(--red)}
-    .import-loading{color:var(--orange)}
-    .import-preview{display:none;margin-top:.85rem;background:#fff;border:1px solid var(--gray-200);border-radius:8px;padding:.75rem;display:none;align-items:center;gap:.85rem}
-    .import-preview.show{display:flex}
-    .import-preview img{width:64px;height:64px;object-fit:cover;border-radius:6px;border:1px solid var(--gray-200);flex-shrink:0}
-    .import-preview-info{flex:1;min-width:0}
-    .import-preview-name{font-weight:700;font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .import-preview-price{color:var(--orange);font-weight:700;font-size:.85rem;margin-top:.15rem}
-    .divider-or{display:flex;align-items:center;gap:.75rem;color:var(--gray-300);font-size:.8rem;margin:1rem 0}
-    .divider-or::before,.divider-or::after{content:'';flex:1;border-top:1px solid var(--gray-200)}
+    /* STEP BOXES */
+    .step-box{display:flex;gap:1rem;margin-bottom:1.25rem;padding:1.1rem;background:#fff;border:1.5px solid var(--gray-200);border-radius:12px}
+    .step-box:focus-within{border-color:var(--orange)}
+    .step-num{width:28px;height:28px;min-width:28px;background:var(--orange);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.82rem;font-weight:800;margin-top:.1rem}
+    .step-content{flex:1;min-width:0}
+    .step-title{font-size:.92rem;font-weight:800;color:var(--gray-900);margin-bottom:.15rem}
+    .step-sub{font-size:.78rem;color:var(--gray-500);margin-bottom:0}
+    .link-input:focus{border-color:var(--orange)}
+    .link-ok{font-size:.78rem;color:var(--green);margin-top:.25rem;display:block}
+    .form-label-sm{font-size:.82rem;font-weight:600;color:var(--gray-700)}
 
     @media(max-width:640px){
       .hero h1{font-size:1.7rem}
@@ -351,105 +339,143 @@
     <div class="form-body">
       <input type="hidden" id="fId" />
 
-      <!-- QUICK IMPORT -->
-      <div class="import-box">
-        <div class="import-box-title">🔗 นำเข้าจากลิงก์ Shopee อัตโนมัติ</div>
-        <div class="import-box-sub">วางลิงก์ Affiliate Shopee → ระบบดึงชื่อ รูป ราคา ให้อัตโนมัติ เลือกแค่หมวดหมู่</div>
-        <div class="import-row">
-          <input class="import-input" id="importUrl" placeholder="วางลิงก์ Shopee เช่น https://s.shopee.co.th/..." onkeydown="if(event.key==='Enter')fetchShopeeData()" />
-          <button class="import-btn" id="importBtn" onclick="fetchShopeeData()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            ดึงข้อมูล
-          </button>
-        </div>
-        <div class="import-status" id="importStatus"></div>
-        <div class="import-preview" id="importPreview">
-          <img id="importPreviewImg" src="" alt="" onerror="this.style.display='none'" />
-          <div class="import-preview-info">
-            <div class="import-preview-name" id="importPreviewName"></div>
-            <div class="import-preview-price" id="importPreviewPrice"></div>
+      <!-- STEP 1: LINKS -->
+      <div class="step-box">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-title">วางลิงก์ Affiliate</div>
+          <div class="step-sub">วางลิงก์จาก Shopee หรือ TikTok Shop — เมื่อลูกค้ากดปุ่มในการ์ดจะพาไปยังร้านค้าโดยตรง</div>
+          <div class="form-grid" style="margin-top:.75rem">
+            <div class="form-group">
+              <label>🛒 ลิงก์ Shopee Affiliate *</label>
+              <input class="form-input link-input" id="fShopee" placeholder="https://s.shopee.co.th/..." oninput="onShopeeLink()" />
+              <span class="link-ok" id="shopeeOk" style="display:none">✅ ลิงก์ถูกต้อง</span>
+            </div>
+            <div class="form-group">
+              <label>🎵 ลิงก์ TikTok Shop (ถ้ามี)</label>
+              <input class="form-input link-input" id="fTiktok" placeholder="https://vt.tiktok.com/..." />
+            </div>
           </div>
         </div>
       </div>
-      <div class="divider-or">หรือกรอกข้อมูลด้วยตนเอง</div>
 
-      <div class="form-section">ข้อมูลสินค้า</div>
-      <div class="form-grid">
-        <div class="form-group">
-          <label>ชื่อสินค้า (ภาษาไทย) *</label>
-          <input class="form-input" id="fNameTh" placeholder="เช่น หูฟังไร้สาย Pro Max" />
-        </div>
-        <div class="form-group">
-          <label>ชื่อสินค้า (English)</label>
-          <input class="form-input" id="fNameEn" placeholder="e.g. Wireless Earbuds Pro Max" />
-        </div>
-        <div class="form-group full">
-          <label>คำอธิบาย (ภาษาไทย)</label>
-          <textarea class="form-textarea" id="fDescTh" placeholder="รายละเอียดสินค้าภาษาไทย..."></textarea>
-        </div>
-        <div class="form-group full">
-          <label>คำอธิบาย (English)</label>
-          <textarea class="form-textarea" id="fDescEn" placeholder="Product description in English..."></textarea>
-        </div>
-        <div class="form-group">
-          <label>หมวดหมู่ *</label>
-          <select class="form-select" id="fCat">
-            <option value="electronics">อิเล็กทรอนิกส์</option>
-            <option value="beauty">ความงาม</option>
-            <option value="fashion">แฟชั่น</option>
-            <option value="home">บ้านและครัว</option>
-            <option value="sports">กีฬา</option>
-            <option value="health">สุขภาพ</option>
-            <option value="books">หนังสือ</option>
-            <option value="toys">ของเล่น</option>
-            <option value="software">โปรแกรม/แอป</option>
-            <option value="affiliate">Affiliate</option>
-            <option value="other">อื่นๆ</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Badge (เช่น ขายดี, ฮอต, ใหม่)</label>
-          <input class="form-input" id="fBadge" placeholder="เว้นว่างถ้าไม่มี" />
+      <!-- STEP 2: PRODUCT INFO -->
+      <div class="step-box">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-title">ข้อมูลสินค้า</div>
+          <div class="step-sub">กรอกชื่อที่จะแสดงบนการ์ดสินค้า</div>
+          <div class="form-grid" style="margin-top:.75rem">
+            <div class="form-group">
+              <label>ชื่อสินค้า (ภาษาไทย) *</label>
+              <input class="form-input" id="fNameTh" placeholder="เช่น หูฟังไร้สาย Pro Max" />
+            </div>
+            <div class="form-group">
+              <label>ชื่อสินค้า (English)</label>
+              <input class="form-input" id="fNameEn" placeholder="e.g. Wireless Earbuds Pro Max" />
+            </div>
+            <div class="form-group">
+              <label>หมวดหมู่ *</label>
+              <select class="form-select" id="fCat">
+                <option value="electronics">อิเล็กทรอนิกส์</option>
+                <option value="beauty">ความงาม</option>
+                <option value="fashion">แฟชั่น</option>
+                <option value="home">บ้านและครัว</option>
+                <option value="sports">กีฬา</option>
+                <option value="health">สุขภาพ</option>
+                <option value="books">หนังสือ</option>
+                <option value="toys">ของเล่น</option>
+                <option value="software">โปรแกรม/แอป</option>
+                <option value="affiliate">Affiliate</option>
+                <option value="other">อื่นๆ</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Badge (เช่น ขายดี, ฮอต, ใหม่)</label>
+              <input class="form-input" id="fBadge" placeholder="เว้นว่างถ้าไม่มี" />
+            </div>
+            <div class="form-group full">
+              <label>คำอธิบายสินค้า</label>
+              <textarea class="form-textarea" id="fDescTh" placeholder="รายละเอียดสินค้า..."></textarea>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="form-section">ราคา</div>
-      <div class="form-grid">
-        <div class="form-group">
-          <label>ราคาขาย (บาท) *</label>
-          <input class="form-input" id="fPrice" type="number" placeholder="เช่น 990" oninput="autoDiscount()" />
-        </div>
-        <div class="form-group">
-          <label>ราคาเดิม (บาท)</label>
-          <input class="form-input" id="fOriginal" type="number" placeholder="เช่น 1490" oninput="autoDiscount()" />
-        </div>
-        <div class="form-group">
-          <label>ส่วนลด %</label>
-          <input class="form-input" id="fDiscount" type="number" placeholder="คำนวณอัตโนมัติ" readonly style="background:var(--gray-50)" />
-        </div>
-        <div class="form-group">
-          <label>Rating (0-5)</label>
-          <input class="form-input" id="fRating" type="number" step="0.1" min="0" max="5" placeholder="เช่น 4.8" />
-        </div>
-        <div class="form-group">
-          <label>จำนวนรีวิว</label>
-          <input class="form-input" id="fReviews" type="number" placeholder="เช่น 1200" />
-        </div>
-        <div class="form-group">
-          <label>ลำดับ (rank)</label>
-          <input class="form-input" id="fRank" type="number" placeholder="เช่น 1, 2, 3..." />
+      <!-- STEP 3: PRICE -->
+      <div class="step-box">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-title">ราคา</div>
+          <div class="step-sub">กรอกราคาตามที่ขายบน Shopee/TikTok</div>
+          <div class="form-grid" style="margin-top:.75rem">
+            <div class="form-group">
+              <label>ราคาขาย (บาท) *</label>
+              <input class="form-input" id="fPrice" type="number" placeholder="เช่น 990" oninput="autoDiscount()" />
+            </div>
+            <div class="form-group">
+              <label>ราคาเดิม (บาท)</label>
+              <input class="form-input" id="fOriginal" type="number" placeholder="เช่น 1490" oninput="autoDiscount()" />
+            </div>
+            <div class="form-group">
+              <label>ส่วนลด % <span style="color:var(--gray-400);font-weight:400">(คำนวณอัตโนมัติ)</span></label>
+              <input class="form-input" id="fDiscount" type="number" readonly style="background:var(--gray-50)" />
+            </div>
+            <div class="form-group">
+              <label>Rating (0–5)</label>
+              <input class="form-input" id="fRating" type="number" step="0.1" min="0" max="5" placeholder="เช่น 4.8" />
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="form-section">ลิงก์ Affiliate</div>
-      <div class="form-grid">
-        <div class="form-group">
-          <label>ลิงก์ Shopee</label>
-          <input class="form-input" id="fShopee" placeholder="https://s.shopee.co.th/..." />
+      <!-- STEP 4: IMAGE -->
+      <div class="step-box">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <div class="step-title">รูปภาพ</div>
+          <div class="step-sub">คัดลอก URL รูปจาก Shopee หรืออัปโหลดใหม่</div>
+          <div style="margin-top:.75rem">
+            <label class="form-label-sm">วาง URL รูปภาพ (คัดลอกจากหน้าสินค้า Shopee ได้เลย)</label>
+            <input class="form-input" id="fImageUrl" placeholder="https://down-th.img.susercontent.com/..." oninput="previewImg()" style="margin-top:.3rem" />
+            <div style="text-align:center;color:var(--gray-300);font-size:.8rem;margin:.6rem 0">— หรืออัปโหลดรูปใหม่ —</div>
+            <details class="cloudinary-config" id="cloudinaryConfig">
+              <summary>⚙️ ตั้งค่า Cloudinary ก่อนอัปโหลด</summary>
+              <div style="margin-top:.5rem">
+                <label style="font-size:.78rem;font-weight:600">Cloud Name</label>
+                <input id="cfCloudName" placeholder="your-cloud-name" oninput="saveCloudinaryCfg()" />
+                <label style="font-size:.78rem;font-weight:600;margin-top:.5rem;display:block">Upload Preset</label>
+                <input id="cfPreset" placeholder="your-upload-preset" oninput="saveCloudinaryCfg()" />
+              </div>
+            </details>
+            <div class="upload-area" onclick="document.getElementById('fImageFile').click()" style="margin-top:.5rem">
+              <div>📁 คลิกเพื่ออัปโหลดรูป</div>
+              <div style="font-size:.75rem;margin-top:.2rem">JPG, PNG, WEBP</div>
+              <input type="file" id="fImageFile" accept="image/*" onchange="uploadToCloudinary(this)" />
+            </div>
+            <div class="upload-spinner" id="uploadSpinner">⏳ กำลังอัปโหลด...</div>
+            <div class="img-preview-wrap" style="margin-top:.5rem">
+              <img class="img-preview" id="fImgPreview" src="" alt="" />
+            </div>
+          </div>
         </div>
-        <div class="form-group">
-          <label>ลิงก์ TikTok Shop</label>
-          <input class="form-input" id="fTiktok" placeholder="https://vt.tiktok.com/..." />
+      </div>
+
+      <!-- OPTIONS -->
+      <div style="padding:.25rem 0">
+        <label class="checkbox-row">
+          <input type="checkbox" id="fFeatured" />
+          ⭐ แสดงในหมวด "ดีลแนะนำห้ามพลาด"
+        </label>
+        <div style="margin-top:.75rem;display:flex;gap:.75rem;flex-wrap:wrap">
+          <div class="form-group" style="min-width:120px">
+            <label>จำนวนรีวิว</label>
+            <input class="form-input" id="fReviews" type="number" placeholder="เช่น 1200" />
+          </div>
+          <div class="form-group" style="min-width:100px">
+            <label>ลำดับ (rank)</label>
+            <input class="form-input" id="fRank" type="number" placeholder="1, 2, 3..." />
+          </div>
         </div>
       </div>
 
@@ -739,179 +765,11 @@ function renderAdminTable(){
 }
 
 // =================== PRODUCT FORM ===================
-// =================== SHOPEE AUTO-IMPORT ===================
 
-// CORS proxy list — tried in order until one works
-const PROXIES = [
-  url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-  url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-];
-
-async function tryFetch(targetUrl) {
-  for (const makeProxy of PROXIES) {
-    try {
-      const res = await fetch(makeProxy(targetUrl), { signal: AbortSignal.timeout(10000) });
-      if (!res.ok) continue;
-      const text = await res.text();
-      if (text && text.length > 500) return text;
-    } catch(e) { /* try next */ }
-  }
-  return null;
-}
-
-// Resolve short URL (s.shopee.co.th) → real product URL via proxy
-async function resolveUrl(url) {
-  // If already a full shopee product URL, return as-is
-  if (/shopee\.co\.th\/[^/]+\/i\.\d+\.\d+/.test(url)) return url;
-  // Try to get redirect target from allorigins (returns final URL in status)
-  try {
-    const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, { signal: AbortSignal.timeout(8000) });
-    const data = await res.json();
-    // allorigins returns the final URL after redirect in status.url
-    if (data.status && data.status.url && data.status.url !== url) return data.status.url;
-    // If contents has a redirect meta or canonical, extract it
-    if (data.contents) {
-      const m = data.contents.match(/canonical['"]\s+href=['"]([^'"]+shopee[^'"]+)['"]/i)
-             || data.contents.match(/url=(['"]?)(https:\/\/shopee\.co\.th[^'">\s]+)/i);
-      if (m) return m[m.length-1];
-    }
-  } catch(e) {}
-  return url; // fallback: use original
-}
-
-async function fetchShopeeData(){
-  const rawUrl = document.getElementById('importUrl').value.trim();
-  if(!rawUrl){ setImportStatus('err','กรุณาวางลิงก์ Shopee ก่อน'); return; }
-
-  const btn = document.getElementById('importBtn');
-  btn.disabled = true;
-  document.getElementById('importPreview').classList.remove('show');
-
-  try {
-    // Step 1: resolve short URL if needed
-    setImportStatus('loading','⏳ กำลัง resolve ลิงก์...');
-    const targetUrl = await resolveUrl(rawUrl);
-
-    // Step 2: fetch page HTML
-    setImportStatus('loading','⏳ กำลังดึงข้อมูลสินค้า...');
-    const html = await tryFetch(targetUrl);
-    if(!html) throw new Error('proxy ทุกตัวใช้ไม่ได้ในขณะนี้');
-
-    // Step 3: parse HTML
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
-
-    const getMeta = (prop) => {
-      const el = doc.querySelector(`meta[property="${prop}"], meta[name="${prop}"]`);
-      return el ? (el.getAttribute('content')||'').trim() : '';
-    };
-
-    let title = getMeta('og:title') || getMeta('twitter:title') || doc.title || '';
-    let image = getMeta('og:image') || getMeta('twitter:image') || '';
-    let desc  = getMeta('og:description') || getMeta('description') || '';
-    let price = 0, originalPrice = 0;
-
-    // JSON-LD structured data (most reliable)
-    doc.querySelectorAll('script[type="application/ld+json"]').forEach(s => {
-      try {
-        const j = JSON.parse(s.textContent);
-        const items = Array.isArray(j) ? j : [j];
-        items.forEach(item => {
-          const offer = item.offers;
-          if(offer){
-            const p = parseFloat(offer.price || offer.lowPrice || 0);
-            const op = parseFloat(offer.highPrice || 0);
-            if(p && !price) price = p;
-            if(op && !originalPrice) originalPrice = op;
-          }
-          if(item.name && !title) title = item.name;
-          if(item.image && !image){
-            image = Array.isArray(item.image) ? item.image[0] : item.image;
-            if(typeof image === 'object') image = image.url || '';
-          }
-        });
-      } catch(e){}
-    });
-
-    // Meta price fallbacks
-    if(!price){
-      const pm = getMeta('product:price:amount') || getMeta('og:price:amount');
-      if(pm) price = parseFloat(pm);
-    }
-
-    // Regex price extraction from raw HTML
-    if(!price){
-      const patterns = [
-        /"currentPrice"\s*:\s*([\d.]+)/,
-        /"price"\s*:\s*"?([\d.]+)"?/,
-        /[฿]\s*([\d,]+(?:\.\d{1,2})?)/,
-        /"discountPrice"\s*:\s*([\d.]+)/,
-        /price['"]\s*:\s*['"]([\d.]+)['"]/i,
-      ];
-      for(const re of patterns){
-        const m = html.match(re);
-        if(m){ price = parseFloat(m[1].replace(/,/g,'')); if(price) break; }
-      }
-    }
-    if(!originalPrice){
-      const m = html.match(/"originalPrice"\s*:\s*([\d.]+)/) || html.match(/"slashedPrice"\s*:\s*([\d.]+)/);
-      if(m) originalPrice = parseFloat(m[1]);
-    }
-
-    // Clean title
-    title = title
-      .replace(/\s*[\|–\-]\s*Shopee.*$/i,'')
-      .replace(/\s*\|\s*Shopee.*$/i,'')
-      .replace(/^【.*?】\s*/,'')
-      .replace(/^\[.*?\]\s*/,'')
-      .trim();
-
-    if(!title) throw new Error('ดึงชื่อสินค้าไม่ได้');
-
-    // Fix image URL
-    if(image && image.startsWith('//')) image = 'https:' + image;
-
-    // Fill form
-    document.getElementById('fNameTh').value = title;
-    document.getElementById('fNameEn').value = title;
-    document.getElementById('fDescTh').value = desc;
-    document.getElementById('fDescEn').value = desc;
-    document.getElementById('fShopee').value = rawUrl;
-
-    if(price){
-      document.getElementById('fPrice').value = Math.round(price);
-      if(originalPrice && originalPrice > price)
-        document.getElementById('fOriginal').value = Math.round(originalPrice);
-      autoDiscount();
-    }
-
-    if(image){
-      document.getElementById('fImageUrl').value = image;
-      const prev = document.getElementById('fImgPreview');
-      prev.src = image; prev.style.display = 'block';
-      document.getElementById('importPreviewImg').src = image;
-      document.getElementById('importPreviewImg').style.display = '';
-    }
-
-    document.getElementById('importPreviewName').textContent = title;
-    document.getElementById('importPreviewPrice').textContent = price
-      ? '฿' + Math.round(price).toLocaleString('th-TH')
-      : 'ไม่พบราคา — กรอกเองในช่องด้านล่าง';
-    document.getElementById('importPreview').classList.add('show');
-    setImportStatus('ok','✅ ดึงข้อมูลสำเร็จ! เลือกหมวดหมู่ แล้วกด "บันทึกสินค้า"');
-
-  } catch(e) {
-    setImportStatus('err','❌ ' + (e.message||'ดึงข้อมูลไม่สำเร็จ')
-      + ' — ลองใช้ลิงก์ตรงจากหน้าสินค้า Shopee (ไม่ใช่ short link)');
-  }
-  btn.disabled = false;
-}
-
-function setImportStatus(type, msg){
-  const el = document.getElementById('importStatus');
-  el.className = 'import-status import-' + type;
-  el.textContent = msg;
+function onShopeeLink(){
+  const v = document.getElementById('fShopee').value.trim();
+  const ok = document.getElementById('shopeeOk');
+  ok.style.display = (v && (v.startsWith('http://') || v.startsWith('https://'))) ? 'block' : 'none';
 }
 
 function autoDiscount(){
@@ -972,7 +830,7 @@ async function uploadToCloudinary(input){
 
 function openForm(id){
   loadCloudinaryCfg();
-  const fields=['fId','fNameTh','fNameEn','fDescTh','fDescEn','fCat','fBadge','fPrice','fOriginal','fDiscount','fRating','fReviews','fRank','fShopee','fTiktok','fImageUrl','fFeatured'];
+  const fields=['fId','fNameTh','fNameEn','fDescTh','fCat','fBadge','fPrice','fOriginal','fDiscount','fRating','fReviews','fRank','fShopee','fTiktok','fImageUrl','fFeatured'];
   fields.forEach(f=>{
     const el=document.getElementById(f);
     if(el) el.type==='checkbox'?el.checked=false:el.value='';
@@ -987,8 +845,7 @@ function openForm(id){
     document.getElementById('fId').value=p.id;
     document.getElementById('fNameTh').value=p.name_th||'';
     document.getElementById('fNameEn').value=p.name_en||'';
-    document.getElementById('fDescTh').value=p.desc_th||'';
-    document.getElementById('fDescEn').value=p.desc_en||'';
+    document.getElementById('fDescTh').value=p.desc_th||p.desc_en||'';
     document.getElementById('fCat').value=p.category||'other';
     document.getElementById('fBadge').value=p.badge||'';
     document.getElementById('fPrice').value=p.price_thb||'';
@@ -1021,7 +878,7 @@ function saveProduct(){
     name_th:name,
     name_en:document.getElementById('fNameEn').value.trim(),
     desc_th:document.getElementById('fDescTh').value.trim(),
-    desc_en:document.getElementById('fDescEn').value.trim(),
+    desc_en:document.getElementById('fDescTh').value.trim(),
     category:document.getElementById('fCat').value,
     badge:document.getElementById('fBadge').value.trim()||null,
     price_thb:price,
