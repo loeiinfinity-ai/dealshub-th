@@ -124,6 +124,7 @@
     .fetch-loading{color:var(--orange)}
     .fetch-ok{color:var(--green)}
     .fetch-err{color:var(--red)}
+    .fetch-warn{color:#d97706}
 
     /* PIN MODAL */
     #pinOverlay .modal-box{max-width:400px;padding:2.5rem 2rem;text-align:center}
@@ -960,9 +961,12 @@ function copyText(elIdOrText,msg){
   });
 }
 
-// =================== SHOPEE AUTO-FETCH (ปรับปรุงใหม่) ===================
-// กลยุทธ์: 1) ดึง Shopee Internal API ผ่าน CORS proxy → ข้อมูลครบ (รูป, ราคา, วีดีโอ)
-//           2) ถ้าล้มเหลว → scrape OG tags ผ่าน CORS proxy (วิธีเดิม)
+// =================== SHOPEE AUTO-FETCH ===================
+// กลยุทธ์:
+//  1) ดึง URL สุดท้ายจาก allorigins (follow redirect) + HTML ในครั้งเดียว
+//  2) ค้นหา shopId/itemId จากทั้ง URL และ HTML content
+//  3) ลอง Shopee Internal API ผ่านหลาย CORS proxy → ข้อมูลครบมาก
+//  4) ถ้าล้มเหลว → parse OG tags + JSON-LD จาก HTML ที่ได้
 let fetchDebounce=null;
 
 function setFetchStatus(elId,type,msg){
@@ -972,50 +976,106 @@ function setFetchStatus(elId,type,msg){
   el.textContent=msg;
 }
 
-// แยก shopId และ itemId จาก Shopee URL เช่น /product-name-i.123456.789012
-function extractShopeeIds(url){
-  // รูปแบบ: -i.{shopId}.{itemId} ที่ท้าย URL
-  const m=url.match(/-i\.(\d+)\.(\d+)/);
-  if(m) return {shopId:m[1],itemId:m[2]};
-  // รูปแบบ: /product/{shopId}/{itemId}
-  const m2=url.match(/\/product\/(\d+)\/(\d+)/);
-  if(m2) return {shopId:m2[1],itemId:m2[2]};
-  return null;
-}
-
-// แปลงราคาจาก Shopee API (หน่วยเป็น 100000 = 1 THB)
+// แปลงราคาจาก Shopee API (raw unit = สตางค์ × 1000 → หาร 100000 ได้ THB)
 function parseShopeePrice(raw){
   if(!raw) return 0;
-  // Shopee ใช้หน่วย cents×100 → ราคาจริง = raw/100000
   return Math.round(raw/100000);
 }
 
-// สร้าง URL รูปจาก hash ของ Shopee
+// URL รูปภาพ Shopee จาก hash
 function shopeeImgUrl(hash){
+  if(!hash) return '';
+  if(hash.startsWith('http')) return hash;
   return `https://down-th.img.susercontent.com/file/${hash}`;
 }
 
-// เรียก Shopee Internal API ผ่าน allorigins proxy
+// ค้นหา shopId + itemId จาก URL และ/หรือ HTML ที่ดึงมา
+function extractShopeeIds(url, html=''){
+  // รูปแบบ: /product-name-i.{shopId}.{itemId}
+  let m=url.match(/-i\.(\d+)\.(\d+)/);
+  if(m) return {shopId:m[1],itemId:m[2]};
+
+  // รูปแบบ: /product/{shopId}/{itemId}
+  m=url.match(/\/product\/(\d+)\/(\d+)/);
+  if(m) return {shopId:m[1],itemId:m[2]};
+
+  // รูปแบบ query string: ?itemid=X&shopid=Y
+  try{
+    const u=new URL(url.startsWith('http')?url:'https://x.com/?'+url);
+    const sid=u.searchParams.get('shopid');
+    const iid=u.searchParams.get('itemid');
+    if(sid&&iid) return {shopId:sid,itemId:iid};
+  }catch(e){}
+
+  // ค้นหาใน HTML content (เผื่อ short URL redirect ไป JS page)
+  if(html){
+    // รูปแบบ -i.shopId.itemId ใน HTML
+    m=html.match(/-i\.(\d{6,})\.(\d{6,})/);
+    if(m) return {shopId:m[1],itemId:m[2]};
+
+    // query string ใน HTML
+    m=html.match(/[?&]itemid=(\d+)&(?:amp;)?shopid=(\d+)/);
+    if(m) return {shopId:m[2],itemId:m[1]};
+    m=html.match(/[?&]shopid=(\d+)&(?:amp;)?itemid=(\d+)/);
+    if(m) return {shopId:m[1],itemId:m[2]};
+
+    // JSON ใน script tag: "itemid":"12345","shopid":"67890"
+    m=html.match(/"itemid"\s*:\s*"?(\d+)"?[^}]*?"shopid"\s*:\s*"?(\d+)"?/);
+    if(m) return {shopId:m[2],itemId:m[1]};
+    m=html.match(/"shopid"\s*:\s*"?(\d+)"?[^}]*?"itemid"\s*:\s*"?(\d+)"?/);
+    if(m) return {shopId:m[1],itemId:m[2]};
+
+    // Shopee API response embedded pattern
+    m=html.match(/shopid['":\s]+(\d{6,})[^}]*?itemid['":\s]+(\d{6,})/);
+    if(m) return {shopId:m[1],itemId:m[2]};
+  }
+  return null;
+}
+
+// ดึง URL จริง (follow redirect) + HTML พร้อมกันในครั้งเดียว
+async function resolveAndFetch(url){
+  const proxies=[
+    {url:`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, isJson:true},
+    {url:`https://corsproxy.io/?url=${encodeURIComponent(url)}`, isJson:false},
+  ];
+  for(const p of proxies){
+    try{
+      const res=await fetch(p.url,{signal:AbortSignal.timeout(15000)});
+      if(!res.ok) continue;
+      if(p.isJson){
+        const j=await res.json();
+        return {resolvedUrl:j.status?.url||url, html:j.contents||''};
+      } else {
+        const html=await res.text();
+        return {resolvedUrl:url, html};
+      }
+    }catch(e){continue;}
+  }
+  return {resolvedUrl:url, html:''};
+}
+
+// เรียก Shopee Internal API ผ่าน CORS proxy — ลองหลายตัวถ้าล้มเหลว
 async function fetchViaShopeeApi(shopId,itemId){
   const apiUrl=`https://shopee.co.th/api/v4/item/get?itemid=${itemId}&shopid=${shopId}`;
-  // ลองหลาย proxy
-  const proxyUrls=[
-    `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`,
-    `https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl)}`,
+  const proxies=[
+    {url:`https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`, isJson:false},
+    {url:`https://corsproxy.io/?url=${encodeURIComponent(apiUrl)}`, isJson:false},
+    {url:`https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl)}`, isJson:true},
+    {url:`https://thingproxy.freeboard.io/fetch/${apiUrl}`, isJson:false},
   ];
-  for(const proxy of proxyUrls){
+  for(const p of proxies){
     try{
-      const res=await fetch(proxy,{signal:AbortSignal.timeout(12000)});
+      const res=await fetch(p.url,{signal:AbortSignal.timeout(12000)});
       if(!res.ok) continue;
       let json;
-      if(proxy.includes('/get?')){
+      if(p.isJson){
         const wrapper=await res.json();
-        json=JSON.parse(wrapper.contents||'{}');
+        try{json=JSON.parse(wrapper.contents||'{}');}catch(e){continue;}
       } else {
-        json=await res.json();
+        const text=await res.text();
+        try{json=JSON.parse(text);}catch(e){continue;}
       }
-      // Shopee API ตอบกลับ: {error:0, data:{...}}
-      if((json.error===0||json.error===null||json.error===undefined)&&json.data){
+      if(json&&(json.error===0||json.error===null||json.error===undefined)&&json.data){
         return json.data;
       }
     }catch(e){continue;}
@@ -1023,207 +1083,168 @@ async function fetchViaShopeeApi(shopId,itemId){
   return null;
 }
 
-// ติดตาม short URL ผ่าน proxy เพื่อหา URL จริง
-async function resolveShortUrl(url){
-  if(!url.includes('s.shopee.co.th')&&url.match(/-i\.\d+\.\d+/)) return url;
-  try{
-    // allorigins จะ follow redirect และคืน URL จริง
-    const proxyUrl=`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-    const res=await fetch(proxyUrl,{signal:AbortSignal.timeout(10000)});
-    if(!res.ok) return url;
-    const json=await res.json();
-    // allorigins คืน status.url เป็น URL ที่ redirect ไป
-    const finalUrl=json.status?.url||url;
-    return finalUrl;
-  }catch(e){return url;}
+// parse OG tags + JSON-LD จาก HTML string
+function parseOgFromHtml(html){
+  const parser=new DOMParser();
+  const doc=parser.parseFromString(html,'text/html');
+
+  const getMeta=(...props)=>{
+    for(const p of props){
+      const el=doc.querySelector(`meta[property="${p}"]`)||doc.querySelector(`meta[name="${p}"]`);
+      const v=el?.getAttribute('content')||'';
+      if(v) return v;
+    }
+    return '';
+  };
+
+  let title=getMeta('og:title','twitter:title','title');
+  title=title.replace(/\s*\|.*$/,'').replace(/\s*[-—]\s*Shopee.*$/i,'').trim();
+
+  const img=getMeta('og:image','og:image:secure_url','twitter:image');
+
+  let desc=getMeta('og:description','description','twitter:description');
+  desc=desc.replace(/\s*\|.*$/,'').trim();
+
+  let price='',origPrice='';
+
+  // meta price
+  const priceMeta=getMeta('product:price:amount','og:price:amount','price');
+  if(priceMeta) price=priceMeta;
+
+  // JSON-LD
+  if(!price){
+    doc.querySelectorAll('script[type="application/ld+json"]').forEach(s=>{
+      if(price) return;
+      try{
+        const d=JSON.parse(s.textContent);
+        const items=Array.isArray(d)?d:[d];
+        items.forEach(item=>{
+          if(price) return;
+          const offers=item.offers||(item['@type']==='Offer'?item:null);
+          if(offers?.price) price=String(offers.price);
+          if(offers?.highPrice) origPrice=String(offers.highPrice);
+        });
+      }catch(e){}
+    });
+  }
+
+  // ค้นหาราคาจาก script data (Shopee Next.js)
+  if(!price){
+    let m=html.match(/"price"\s*:\s*(\d+)/);
+    if(m) price=String(parseShopeePrice(parseInt(m[1]))||parseFloat(m[1]));
+    m=html.match(/["']price["']\s*:\s*["']?([\d.]+)["']?/);
+    if(m&&!price) price=m[1];
+  }
+
+  return {title, img, desc, price, origPrice};
 }
 
-// ฟังก์ชันหลัก: ดึงข้อมูลสินค้าจาก Shopee URL (ปรับปรุงใหม่)
+// =================== MAIN FETCH FUNCTION ===================
 async function fetchShopeeData(url,opts){
   const {nameId,descId,priceId,imageId,imagePreviewId,statusId}=opts;
-  setFetchStatus(statusId,'loading','⏳ กำลังดึงข้อมูลสินค้า...');
+  setFetchStatus(statusId,'loading','⏳ กำลังตรวจสอบลิงก์...');
 
-  let resolvedUrl=url;
-  let shopeeData=null;
-  let shopId=null,itemId=null;
+  let shopeeApiData=null;
   let allImages=[];
   let videoUrl=null;
 
-  // Step 1: Resolve short URL
-  if(url.includes('s.shopee.co.th')||!url.match(/-i\.\d+\.\d+/)){
-    setFetchStatus(statusId,'loading','⏳ กำลังตรวจสอบลิงก์...');
-    resolvedUrl=await resolveShortUrl(url);
-  }
+  // Step 1: ดึง URL จริง + HTML ในครั้งเดียว (follow redirect อัตโนมัติ)
+  const {resolvedUrl, html}=await resolveAndFetch(url);
 
-  // Step 2: Extract IDs from URL
-  const ids=extractShopeeIds(resolvedUrl);
+  // Step 2: ค้นหา shopId/itemId จากทั้ง URL และ HTML
+  const ids=extractShopeeIds(resolvedUrl,html);
+
+  // Step 3: ถ้าเจอ IDs → ลอง Shopee API (ได้ข้อมูลครบกว่า)
   if(ids){
-    shopId=ids.shopId;
-    itemId=ids.itemId;
-    setFetchStatus(statusId,'loading','⏳ กำลังดึงข้อมูลจาก Shopee API...');
-    shopeeData=await fetchViaShopeeApi(shopId,itemId);
-  }
+    const {shopId,itemId}=ids;
+    setFetchStatus(statusId,'loading',`⏳ พบ ID สินค้า — กำลังดึงข้อมูลจาก Shopee...`);
+    shopeeApiData=await fetchViaShopeeApi(shopId,itemId);
 
-  // Step 3A: ถ้า Shopee API สำเร็จ → ใช้ข้อมูลจาก API (ครบที่สุด)
-  if(shopeeData){
-    const name=shopeeData.name||'';
-    const desc=shopeeData.description||'';
-    const rawPrice=shopeeData.price||shopeeData.price_min||0;
-    const rawOriginal=shopeeData.price_before_discount||0;
-    const price=parseShopeePrice(rawPrice);
-    const origPrice=rawOriginal&&rawOriginal!==rawPrice?parseShopeePrice(rawOriginal):0;
+    if(shopeeApiData){
+      const name=shopeeApiData.name||'';
+      const desc=shopeeApiData.description||'';
+      const rawPrice=shopeeApiData.price_min||shopeeApiData.price||0;
+      const rawOriginal=shopeeApiData.price_before_discount||0;
+      const price=parseShopeePrice(rawPrice);
+      const origPrice=rawOriginal&&rawOriginal!==rawPrice?parseShopeePrice(rawOriginal):0;
 
-    // รูปภาพทุกรูป
-    const rawImages=shopeeData.images||[];
-    allImages=rawImages.slice(0,12).map(shopeeImgUrl);
-    const firstImg=allImages[0]||'';
+      const rawImages=shopeeApiData.images||[];
+      allImages=rawImages.slice(0,12).map(shopeeImgUrl).filter(Boolean);
+      const firstImg=allImages[0]||'';
 
-    // วีดีโอ
-    const videoList=shopeeData.video_info_list||[];
-    videoUrl=videoList[0]?.video_url||videoList[0]?.url||null;
+      const videoList=shopeeApiData.video_info_list||[];
+      videoUrl=videoList[0]?.video_url||videoList[0]?.url||null;
 
-    // Rating
-    const ratingData=shopeeData.item_rating||{};
-    const rating=ratingData.rating_star||null;
-    const reviewCount=(ratingData.rating_count||[]).reduce((a,b)=>a+b,0)||shopeeData.cmt_count||0;
+      const ratingData=shopeeApiData.item_rating||{};
+      const rating=ratingData.rating_star||null;
+      const reviewCount=(ratingData.rating_count||[]).reduce((a,b)=>a+b,0)||shopeeApiData.cmt_count||0;
 
-    // ใส่ข้อมูลลงฟอร์ม
-    const nameEl=document.getElementById(nameId);
-    if(nameEl&&!nameEl.value.trim()&&name) nameEl.value=name;
-
-    const descEl=document.getElementById(descId);
-    if(descEl&&!descEl.value.trim()&&desc) descEl.value=desc.slice(0,500);
-
-    if(price){
-      const priceEl=document.getElementById(priceId);
-      if(priceEl&&!priceEl.value) priceEl.value=price;
-    }
-    if(origPrice){
-      const origEl=document.getElementById('qOriginal')||document.getElementById('fOriginal');
-      if(origEl&&!origEl.value) origEl.value=origPrice;
-    }
-    if(firstImg){
-      const imgUrlEl=document.getElementById(imageId);
-      if(imgUrlEl&&!imgUrlEl.value) imgUrlEl.value=firstImg;
-      const previewEl=document.getElementById(imagePreviewId);
-      if(previewEl){previewEl.src=firstImg;previewEl.style.display='block';}
-    }
-
-    // เก็บข้อมูลพิเศษ (ใช้ตอน save)
-    opts._allImages=allImages;
-    opts._videoUrl=videoUrl;
-    opts._rating=rating;
-    opts._reviews=reviewCount;
-    opts._shopeeUrl=`https://shopee.co.th/${encodeURIComponent(name.slice(0,60))}-i.${shopId}.${itemId}`;
-
-    const filled=[];
-    if(name) filled.push('ชื่อ');
-    if(firstImg) filled.push('รูป'+( allImages.length>1?` (${allImages.length} รูป)`:'' ));
-    if(price) filled.push('ราคา');
-    if(desc) filled.push('คำอธิบาย');
-    if(videoUrl) filled.push('วีดีโอ');
-
-    setFetchStatus(statusId,'ok',`✅ ดึงข้อมูลสำเร็จ: ${filled.join(', ')}`);
-    return;
-  }
-
-  // Step 3B: Fallback → scrape HTML ผ่าน CORS proxy (วิธีเดิม + ปรับปรุง)
-  setFetchStatus(statusId,'loading','⏳ กำลังดึงข้อมูลจากหน้าสินค้า...');
-  const proxies=[
-    `https://api.allorigins.win/get?url=${encodeURIComponent(resolvedUrl)}`,
-    `https://corsproxy.io/?${encodeURIComponent(resolvedUrl)}`,
-  ];
-
-  let html='';
-  for(const proxyUrl of proxies){
-    try{
-      const res=await fetch(proxyUrl,{signal:AbortSignal.timeout(12000)});
-      if(!res.ok) continue;
-      if(proxyUrl.includes('allorigins.win/get')){
-        const j=await res.json();
-        html=j.contents||'';
-      } else {
-        html=await res.text();
+      const nameEl=document.getElementById(nameId);
+      if(nameEl&&!nameEl.value.trim()&&name) nameEl.value=name;
+      const descEl=document.getElementById(descId);
+      if(descEl&&!descEl.value.trim()&&desc) descEl.value=desc.slice(0,500);
+      if(price){const el=document.getElementById(priceId);if(el&&!el.value) el.value=price;}
+      if(origPrice){
+        const el=document.getElementById('qOriginal')||document.getElementById('fOriginal');
+        if(el&&!el.value) el.value=origPrice;
       }
-      if(html.length>500) break;
-    }catch(e){continue;}
+      if(firstImg){
+        const el=document.getElementById(imageId);if(el&&!el.value) el.value=firstImg;
+        const prev=document.getElementById(imagePreviewId);
+        if(prev){prev.src=firstImg;prev.style.display='block';}
+      }
+
+      opts._allImages=allImages;
+      opts._videoUrl=videoUrl;
+      opts._rating=rating;
+      opts._reviews=reviewCount;
+      opts._shopeeUrl=resolvedUrl.includes('shopee.co.th')?resolvedUrl:url;
+
+      const filled=[];
+      if(name) filled.push('ชื่อ');
+      if(firstImg) filled.push('รูป'+(allImages.length>1?` (${allImages.length} รูป)`:''));
+      if(price) filled.push('ราคา');
+      if(desc) filled.push('คำอธิบาย');
+      if(videoUrl) filled.push('วีดีโอ');
+
+      setFetchStatus(statusId,'ok',`✅ ดึงข้อมูลสำเร็จ: ${filled.join(', ')}`);
+      return;
+    }
   }
 
-  if(!html){
-    setFetchStatus(statusId,'err','⚠️ ดึงข้อมูลไม่ได้ — กรอกข้อมูลเองได้เลย');
+  // Step 4: Fallback → parse OG tags จาก HTML ที่ดึงมาแล้ว
+  // ถ้า HTML ว่าง หรือ ได้ HTML จาก short URL (ไม่ใช่หน้าสินค้า) → ลองดึงหน้าสินค้าโดยตรง
+  let pageHtml=html;
+  if((!pageHtml||pageHtml.length<2000)&&resolvedUrl!==url){
+    setFetchStatus(statusId,'loading','⏳ กำลังดึงข้อมูลจากหน้าสินค้า...');
+    const {html:h2}=await resolveAndFetch(resolvedUrl);
+    if(h2&&h2.length>pageHtml.length) pageHtml=h2;
+  }
+
+  if(!pageHtml||pageHtml.length<200){
+    setFetchStatus(statusId,'err','⚠️ ดึงข้อมูลไม่ได้ (CORS proxy อาจถูก block) — กรอกข้อมูลเองได้เลย');
     return;
   }
 
   try{
-    const parser=new DOMParser();
-    const doc=parser.parseFromString(html,'text/html');
-
-    const getMeta=(...props)=>{
-      for(const p of props){
-        const el=doc.querySelector(`meta[property="${p}"]`)||doc.querySelector(`meta[name="${p}"]`);
-        const v=el?.getAttribute('content')||'';
-        if(v) return v;
-      }
-      return '';
-    };
-
-    let title=getMeta('og:title','twitter:title');
-    title=title.replace(/\s*\|.*$/,'').replace(/\s*-\s*Shopee.*$/i,'').trim();
-
-    const img=getMeta('og:image','og:image:secure_url','twitter:image');
-
-    let desc=getMeta('og:description','description','twitter:description');
-    desc=desc.replace(/\s*\|.*$/,'').trim();
-
-    let price='',origPrice='';
-    const priceMeta=getMeta('product:price:amount','og:price:amount','price');
-    if(priceMeta) price=priceMeta;
-
-    if(!price){
-      doc.querySelectorAll('script[type="application/ld+json"]').forEach(s=>{
-        if(price) return;
-        try{
-          const d=JSON.parse(s.textContent);
-          const items=Array.isArray(d)?d:[d];
-          items.forEach(item=>{
-            if(price) return;
-            const offers=item.offers||(item['@type']==='Offer'?item:null);
-            if(offers?.price) price=String(offers.price);
-            if(offers?.highPrice) origPrice=String(offers.highPrice);
-          });
-        }catch(e){}
-      });
-    }
-
-    if(!price){
-      const m=html.match(/["']price["']\s*:\s*["']?([\d.]+)["']?/);
-      if(m) price=m[1];
-    }
+    const {title,img,desc,price,origPrice}=parseOgFromHtml(pageHtml);
 
     const nameEl=document.getElementById(nameId);
     if(nameEl&&!nameEl.value.trim()&&title) nameEl.value=title;
-
     const descEl=document.getElementById(descId);
     if(descEl&&!descEl.value.trim()&&desc) descEl.value=desc;
-
-    if(price){
-      const priceEl=document.getElementById(priceId);
-      if(priceEl&&!priceEl.value) priceEl.value=parseFloat(price)||'';
-    }
+    if(price){const el=document.getElementById(priceId);if(el&&!el.value) el.value=parseFloat(price)||'';}
     if(origPrice){
-      const origEl=document.getElementById('qOriginal')||document.getElementById('fOriginal');
-      if(origEl&&!origEl.value) origEl.value=parseFloat(origPrice)||'';
+      const el=document.getElementById('qOriginal')||document.getElementById('fOriginal');
+      if(el&&!el.value) el.value=parseFloat(origPrice)||'';
     }
-
     if(img){
-      const imgUrlEl=document.getElementById(imageId);
-      if(imgUrlEl&&!imgUrlEl.value) imgUrlEl.value=img;
-      const previewEl=document.getElementById(imagePreviewId);
-      if(previewEl){previewEl.src=img;previewEl.style.display='block';}
+      const el=document.getElementById(imageId);if(el&&!el.value) el.value=img;
+      const prev=document.getElementById(imagePreviewId);
+      if(prev){prev.src=img;prev.style.display='block';}
       opts._allImages=[img];
     }
-
-    opts._shopeeUrl=resolvedUrl;
+    opts._shopeeUrl=resolvedUrl!==url?resolvedUrl:url;
 
     const filled=[];
     if(title) filled.push('ชื่อ');
@@ -1234,7 +1255,7 @@ async function fetchShopeeData(url,opts){
     if(filled.length){
       setFetchStatus(statusId,'ok',`✅ ดึงข้อมูลสำเร็จ: ${filled.join(', ')} — ตรวจสอบแล้วกดบันทึก`);
     } else {
-      setFetchStatus(statusId,'err','⚠️ ดึงข้อมูลได้บางส่วน — กรอกชื่อและราคาเพิ่มเติม');
+      setFetchStatus(statusId,'warn','⚠️ Shopee ส่งหน้า JavaScript-only มา — กรุณากรอกชื่อและราคาเอง หรือลองลิงก์ใหม่');
     }
   }catch(e){
     setFetchStatus(statusId,'err','⚠️ ดึงข้อมูลไม่ได้ — กรอกข้อมูลเองได้เลย');
