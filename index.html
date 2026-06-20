@@ -214,6 +214,33 @@
     .upload-spinner{display:none;color:var(--orange);font-size:.82rem;margin-top:.4rem}
     .link-ok{font-size:.78rem;color:var(--green);margin-top:.25rem}
 
+    /* GOOGLE SHEET SECTION */
+    .sheet-section{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1.5rem}
+    .sheet-section-title{display:flex;align-items:center;gap:.5rem;font-size:1rem;font-weight:800;color:#15803d;margin-bottom:.85rem}
+    .sheet-section-title svg{width:20px;height:20px}
+    .sheet-howto{background:#fff;border:1px solid #bbf7d0;border-radius:8px;padding:.85rem 1rem;font-size:.8rem;color:#166534;line-height:1.7;margin-bottom:1rem}
+    .sheet-howto strong{display:block;font-size:.88rem;margin-bottom:.3rem;color:#15803d}
+    .sheet-howto code{background:#dcfce7;border-radius:3px;padding:.1rem .35rem;font-size:.78rem;font-family:monospace}
+    .sheet-input-row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:.75rem}
+    .sheet-input{flex:1;min-width:200px;border:1.5px solid #86efac;border-radius:8px;padding:.55rem .85rem;font-size:.85rem;font-family:inherit;outline:none;background:#fff}
+    .sheet-input:focus{border-color:#22c55e}
+    .sheet-input-sm{width:120px;flex:none}
+    .sheet-sync-btn{background:#22c55e;color:#fff;border:none;border-radius:8px;padding:.55rem 1.25rem;font-size:.88rem;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:.4rem;white-space:nowrap;transition:background .15s}
+    .sheet-sync-btn:hover{background:#16a34a}
+    .sheet-sync-btn:disabled{background:#86efac;cursor:not-allowed}
+    .sheet-status{font-size:.82rem;margin-top:.4rem}
+    .sheet-status.ok{color:#16a34a}
+    .sheet-status.err{color:#dc2626}
+    .sheet-status.loading{color:#d97706}
+    .sheet-auto-row{display:flex;align-items:center;gap:.6rem;font-size:.83rem;font-weight:600;color:#166534}
+    .sheet-auto-row input{accent-color:#22c55e;width:15px;height:15px}
+    .sheet-col-guide{margin-top:.85rem}
+    .sheet-col-guide summary{font-size:.8rem;font-weight:600;color:#15803d;cursor:pointer}
+    .sheet-col-table{width:100%;border-collapse:collapse;font-size:.78rem;margin-top:.5rem}
+    .sheet-col-table th{background:#dcfce7;text-align:left;padding:.35rem .65rem;border-bottom:1px solid #86efac;font-weight:700;color:#15803d}
+    .sheet-col-table td{padding:.3rem .65rem;border-bottom:1px solid #f0fdf4;color:var(--gray-700)}
+    .sheet-col-table tr:last-child td{border-bottom:none}
+
     /* SHARE MODAL */
     #shareOverlay .modal-box{max-width:480px}
     .share-header{background:var(--blue);color:#fff;padding:1.1rem 1.5rem;display:flex;align-items:center;justify-content:space-between}
@@ -363,6 +390,54 @@
       </div>
     </div>
     <div class="admin-content">
+      <!-- GOOGLE SHEET SYNC SECTION -->
+      <div class="sheet-section">
+        <div class="sheet-section-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
+          ซิงค์สินค้าจาก Google Sheets อัตโนมัติ
+        </div>
+        <div class="sheet-howto">
+          <strong>📋 วิธีใช้งาน — 3 ขั้นตอน</strong>
+          1️⃣ เปิด Google Sheets → สร้างชีทใหม่ → กรอกสินค้าตามคอลัมน์ด้านล่าง<br/>
+          2️⃣ กด <strong>แชร์</strong> → เลือก <strong>"ทุกคนที่มีลิงก์"</strong> (ดูได้อย่างเดียว)<br/>
+          3️⃣ คัดลอก <strong>Sheet ID</strong> จาก URL เช่น <code>docs.google.com/spreadsheets/d/<strong>1BxiM...</strong>/edit</code> → วางด้านล่าง
+        </div>
+        <div class="sheet-input-row">
+          <input class="sheet-input" id="sheetId" placeholder="Sheet ID เช่น 1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms" />
+          <input class="sheet-input sheet-input-sm" id="sheetName" placeholder="ชื่อ Tab (Sheet1)" title="ชื่อ Tab ของ Google Sheet" />
+          <button class="sheet-sync-btn" id="sheetSyncBtn" onclick="syncFromSheet()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            Sync จาก Sheet
+          </button>
+        </div>
+        <div id="sheetStatus" class="sheet-status"></div>
+        <label class="sheet-auto-row" style="margin-top:.6rem">
+          <input type="checkbox" id="sheetAutoSync" onchange="saveSheetConfig()" />
+          ดึงข้อมูลจาก Sheet อัตโนมัติทุกครั้งที่เปิดหน้าเว็บ
+        </label>
+        <details class="sheet-col-guide">
+          <summary>📊 โครงสร้างคอลัมน์ใน Google Sheet (คลิกดู)</summary>
+          <table class="sheet-col-table">
+            <thead><tr><th>คอลัมน์</th><th>ข้อมูล</th><th>ตัวอย่าง</th><th>จำเป็น</th></tr></thead>
+            <tbody>
+              <tr><td><strong>A</strong></td><td>ชื่อสินค้า (ภาษาไทย)</td><td>หูฟังไร้สาย Pro Max</td><td>✅</td></tr>
+              <tr><td><strong>B</strong></td><td>ราคาขาย (บาท)</td><td>769</td><td>✅</td></tr>
+              <tr><td><strong>C</strong></td><td>ราคาเดิม (บาท)</td><td>1290</td><td>-</td></tr>
+              <tr><td><strong>D</strong></td><td>หมวดหมู่</td><td>electronics / beauty / fashion / home / sports / health / other</td><td>-</td></tr>
+              <tr><td><strong>E</strong></td><td>Badge</td><td>ขายดี / ฮอต / ใหม่</td><td>-</td></tr>
+              <tr><td><strong>F</strong></td><td>ลิงก์ Shopee Affiliate</td><td>https://s.shopee.co.th/...</td><td>✅</td></tr>
+              <tr><td><strong>G</strong></td><td>URL รูปภาพ</td><td>https://down-th.img.susercontent.com/...</td><td>-</td></tr>
+              <tr><td><strong>H</strong></td><td>คำอธิบายสินค้า</td><td>หูฟัง Bluetooth 5.3 ตัดเสียง...</td><td>-</td></tr>
+              <tr><td><strong>I</strong></td><td>แสดงในดีลแนะนำ</td><td>TRUE / FALSE</td><td>-</td></tr>
+              <tr><td><strong>J</strong></td><td>Rating (0-5)</td><td>4.8</td><td>-</td></tr>
+              <tr><td><strong>K</strong></td><td>จำนวนรีวิว</td><td>1248</td><td>-</td></tr>
+              <tr><td><strong>L</strong></td><td>ลำดับ (rank)</td><td>1, 2, 3...</td><td>-</td></tr>
+            </tbody>
+          </table>
+          <div style="margin-top:.6rem;font-size:.77rem;color:#166534">💡 แถวแรกเป็น header ได้ (ระบบข้ามให้อัตโนมัติ) — ถ้าคอลัมน์เว้นว่างจะใช้ค่าเริ่มต้น</div>
+        </details>
+      </div>
+
       <div class="admin-stats" id="adminStats"></div>
       <div class="admin-toolbar">
         <div class="admin-toolbar-left">
@@ -867,8 +942,199 @@ function checkPin(){
   }
 }
 
+// =================== GOOGLE SHEETS SYNC ===================
+const SHEET_CFG_KEY='dealshub_sheet_cfg';
+
+function saveSheetConfig(){
+  const cfg={
+    id:document.getElementById('sheetId')?.value.trim()||'',
+    name:document.getElementById('sheetName')?.value.trim()||'Sheet1',
+    autoSync:document.getElementById('sheetAutoSync')?.checked||false,
+  };
+  localStorage.setItem(SHEET_CFG_KEY,JSON.stringify(cfg));
+}
+
+function loadSheetConfig(){
+  try{
+    const cfg=JSON.parse(localStorage.getItem(SHEET_CFG_KEY)||'{}');
+    const idEl=document.getElementById('sheetId');
+    const nameEl=document.getElementById('sheetName');
+    const autoEl=document.getElementById('sheetAutoSync');
+    if(idEl&&cfg.id) idEl.value=cfg.id;
+    if(nameEl) nameEl.value=cfg.name||'Sheet1';
+    if(autoEl) autoEl.checked=!!cfg.autoSync;
+    return cfg;
+  }catch(e){return {};}
+}
+
+function setSheetStatus(type,msg){
+  const el=document.getElementById('sheetStatus');
+  if(!el) return;
+  el.className='sheet-status'+(type?' '+type:'');
+  el.textContent=msg;
+}
+
+// แปลง Google Visualization Query (gviz) JSON → array ของ row values
+function parseGvizResponse(raw){
+  // gviz คืนมาในรูป: /*O_o*/ google.visualization.Query.setResponse({...});
+  const m=raw.match(/google\.visualization\.Query\.setResponse\((\{[\s\S]*\})\)/);
+  if(!m) throw new Error('รูปแบบ response ไม่ถูกต้อง — ตรวจสอบว่า Sheet เป็น public แล้ว');
+  const json=JSON.parse(m[1]);
+  if(json.status==='error'){
+    const reason=json.errors?.[0]?.detailed_message||json.errors?.[0]?.message||'ไม่ทราบสาเหตุ';
+    throw new Error('Google Sheets error: '+reason);
+  }
+  const table=json.table;
+  if(!table||!table.rows) throw new Error('ไม่พบข้อมูลในชีท');
+
+  // ตรวจสอบว่าแถวแรกเป็น header หรือไม่
+  const cols=table.cols||[];
+  const rows=table.rows||[];
+  // ถ้า col label ตรงกับคอลัมน์ที่คาดหวัง → มี header → ข้ามแถวแรก (rows[0])
+  const firstRowVals=(rows[0]?.c||[]).map(c=>String(c?.v||'').toLowerCase());
+  const looksLikeHeader=firstRowVals.some(v=>
+    v.includes('ชื่อ')||v.includes('ราคา')||v.includes('name')||v.includes('price')
+  );
+  const dataRows=looksLikeHeader?rows.slice(1):rows;
+  return dataRows;
+}
+
+// แปลง gviz row → product object
+function mapSheetRowToProduct(row,index){
+  const cells=row.c||[];
+  const get=(i)=>{
+    const c=cells[i];
+    if(!c||c.v===null||c.v===undefined) return '';
+    return String(c.v).trim();
+  };
+  const getNum=(i)=>parseFloat(get(i))||null;
+  const getBool=(i)=>{
+    const v=get(i).toLowerCase();
+    return v==='true'||v==='yes'||v==='1'||v==='ใช่';
+  };
+
+  const name=get(0);
+  const price=getNum(1);
+  if(!name||!price) return null; // ต้องมีชื่อและราคาอย่างน้อย
+
+  const original=getNum(2)||null;
+  const discount=original&&original>price?Math.round((original-price)/original*100):null;
+
+  // normalize category
+  const rawCat=get(3).toLowerCase();
+  const catMap={
+    'electronics':'electronics','อิเล็กทรอนิกส์':'electronics',
+    'beauty':'beauty','ความงาม':'beauty','เครื่องสำอาง':'beauty',
+    'fashion':'fashion','แฟชั่น':'fashion','เสื้อผ้า':'fashion',
+    'home':'home','บ้าน':'home','ครัว':'home','บ้านและครัว':'home',
+    'sports':'sports','กีฬา':'sports',
+    'health':'health','สุขภาพ':'health',
+    'books':'books','หนังสือ':'books',
+    'toys':'toys','ของเล่น':'toys',
+    'other':'other','อื่นๆ':'other',
+  };
+  const category=catMap[rawCat]||rawCat||'other';
+
+  return {
+    id: Date.now()+index, // unique id
+    name_th: name,
+    name_en: '',
+    desc_th: get(7),
+    desc_en: get(7),
+    category,
+    badge: get(4)||null,
+    price_thb: price,
+    original_thb: original,
+    discount,
+    shopee: get(5)||null,
+    image: get(6)||null,
+    images: [],
+    videoUrl: null,
+    featured: getBool(8),
+    rating: getNum(9),
+    reviews: parseInt(get(10))||0,
+    rank: parseInt(get(11))||index+1,
+  };
+}
+
+async function syncFromSheet(){
+  const btn=document.getElementById('sheetSyncBtn');
+  const idVal=document.getElementById('sheetId')?.value.trim();
+  const nameVal=document.getElementById('sheetName')?.value.trim()||'Sheet1';
+
+  if(!idVal){
+    setSheetStatus('err','⚠️ กรุณากรอก Sheet ID ก่อน');
+    document.getElementById('sheetId')?.focus();
+    return;
+  }
+
+  // บันทึก config ก่อน sync
+  saveSheetConfig();
+
+  btn.disabled=true;
+  setSheetStatus('loading','⏳ กำลังเชื่อมต่อ Google Sheets...');
+
+  try{
+    // Google Visualization Query API — ทำงานกับ public sheet โดยไม่ต้อง API key
+    const encodedName=encodeURIComponent(nameVal);
+    const gvizUrl=`https://docs.google.com/spreadsheets/d/${idVal}/gviz/tq?tqx=out:json&sheet=${encodedName}`;
+
+    const res=await fetch(gvizUrl,{signal:AbortSignal.timeout(15000)});
+    if(!res.ok){
+      throw new Error(`HTTP ${res.status} — ตรวจสอบว่า Sheet ID ถูกต้องและแชร์เป็น public แล้ว`);
+    }
+
+    const raw=await res.text();
+    if(raw.includes('signin')||raw.includes('ServiceLogin')){
+      throw new Error('Sheet ยังไม่ได้แชร์เป็น public — กด "แชร์" → "ทุกคนที่มีลิงก์"');
+    }
+
+    setSheetStatus('loading','⏳ กำลังประมวลผลข้อมูล...');
+    const rows=parseGvizResponse(raw);
+
+    if(!rows.length){
+      throw new Error('ไม่พบข้อมูลในชีท — ตรวจสอบว่ากรอกข้อมูลในคอลัมน์ A-F แล้ว');
+    }
+
+    const products=rows
+      .map((row,i)=>mapSheetRowToProduct(row,i))
+      .filter(Boolean);
+
+    if(!products.length){
+      throw new Error('ไม่สามารถอ่านข้อมูลได้ — ต้องมีชื่อสินค้า (คอลัมน์ A) และราคา (คอลัมน์ B)');
+    }
+
+    // รวมกับสินค้าที่มีอยู่แล้ว (ถ้าต้องการ merge) หรือแทนที่ทั้งหมด
+    const existing=getProducts().filter(p=>p._source!=='sheet'); // เก็บสินค้าที่เพิ่มเองไว้
+    const sheetProducts=products.map(p=>({...p,_source:'sheet'}));
+    const merged=[...existing,...sheetProducts];
+
+    saveProducts(merged);
+    renderAdminPanel();
+    renderAll();
+
+    const lastSync=new Date().toLocaleString('th-TH');
+    localStorage.setItem('dealshub_last_sheet_sync',lastSync);
+    setSheetStatus('ok',`✅ ซิงค์สำเร็จ! นำเข้า ${products.length} สินค้าจาก Sheet — อัปเดตล่าสุด: ${lastSync}`);
+    showToast(`✅ ซิงค์ ${products.length} สินค้าจาก Google Sheet สำเร็จ!`);
+
+  }catch(e){
+    setSheetStatus('err','❌ '+e.message);
+  }finally{
+    btn.disabled=false;
+  }
+}
+
+// auto-sync on page load ถ้าเปิดใช้งาน
+async function autoSyncIfEnabled(){
+  const cfg=loadSheetConfig();
+  if(cfg.autoSync&&cfg.id){
+    await syncFromSheet();
+  }
+}
+
 // =================== ADMIN PANEL ===================
-function renderAdminPanel(){renderAdminStats();renderAdminTable();}
+function renderAdminPanel(){loadSheetConfig();renderAdminStats();renderAdminTable();}
 
 function renderAdminStats(){
   const p=getProducts();
@@ -1518,6 +1784,7 @@ document.addEventListener('keydown',e=>{
 
 // =================== INIT ===================
 renderAll();
+autoSyncIfEnabled();
 </script>
 </body>
 </html>
