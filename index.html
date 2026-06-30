@@ -830,6 +830,21 @@
             Sync จาก Sheet
           </button>
         </div>
+        <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem;flex-wrap:wrap">
+          <label style="font-size:.82rem;font-weight:700;color:#15803d;white-space:nowrap">🏷️ หมวดหมู่สินค้าที่นำเข้า:</label>
+          <select class="sheet-input" id="sheetCatOverride" style="max-width:280px;flex:none" onchange="saveSheetConfig()">
+            <option value="">ตามข้อมูลในชีท (คอลัมน์ D)</option>
+            <option value="electronics">อิเล็กทรอนิกส์</option>
+            <option value="fashion">แฟชั่น</option>
+            <option value="home">บ้านและครัว</option>
+            <option value="beauty">ความงาม &amp; สุขภาพ</option>
+            <option value="toys">ของเล่น &amp; งานอดิเรก</option>
+            <option value="sports">กีฬา &amp; กลางแจ้ง</option>
+            <option value="books">หนังสือ &amp; สะสม</option>
+            <option value="other">อื่นๆ</option>
+          </select>
+          <span style="font-size:.75rem;color:#4ade80">เลือก "ตามข้อมูลในชีท" เพื่อให้ระบบใช้ค่าจากคอลัมน์ D</span>
+        </div>
         <div id="sheetStatus" class="sheet-status"></div>
         <label class="sheet-auto-row" style="margin-top:.6rem">
           <input type="checkbox" id="sheetAutoSync" onchange="saveSheetConfig()" />
@@ -1382,16 +1397,17 @@ function checkPin(){
 // =================== GOOGLE SHEETS ===================
 const SHEET_CFG_KEY='dealshub_sheet_cfg';
 function saveSheetConfig(){
-  const cfg={id:document.getElementById('sheetId')?.value.trim()||'',name:document.getElementById('sheetName')?.value.trim()||'Sheet1',autoSync:document.getElementById('sheetAutoSync')?.checked||false};
+  const cfg={id:document.getElementById('sheetId')?.value.trim()||'',name:document.getElementById('sheetName')?.value.trim()||'Sheet1',autoSync:document.getElementById('sheetAutoSync')?.checked||false,catOverride:document.getElementById('sheetCatOverride')?.value||''};
   localStorage.setItem(SHEET_CFG_KEY,JSON.stringify(cfg));
 }
 function loadSheetConfig(){
   try{
     const cfg=JSON.parse(localStorage.getItem(SHEET_CFG_KEY)||'{}');
-    const idEl=document.getElementById('sheetId');const nameEl=document.getElementById('sheetName');const autoEl=document.getElementById('sheetAutoSync');
+    const idEl=document.getElementById('sheetId');const nameEl=document.getElementById('sheetName');const autoEl=document.getElementById('sheetAutoSync');const catEl=document.getElementById('sheetCatOverride');
     if(idEl&&cfg.id) idEl.value=cfg.id;
     if(nameEl) nameEl.value=cfg.name||'Sheet1';
     if(autoEl) autoEl.checked=!!cfg.autoSync;
+    if(catEl&&cfg.catOverride) catEl.value=cfg.catOverride;
     return cfg;
   }catch(e){return {};}
 }
@@ -1411,7 +1427,7 @@ function parseGvizResponse(raw){
   const looksLikeHeader=firstRowVals.some(v=>v.includes('ชื่อ')||v.includes('ราคา')||v.includes('name')||v.includes('price'));
   return looksLikeHeader?rows.slice(1):rows;
 }
-function mapSheetRowToProduct(row,index){
+function mapSheetRowToProduct(row,index,catOverride=''){
   const cells=row.c||[];
   const get=(i)=>{const c=cells[i];if(!c||c.v===null||c.v===undefined) return '';return String(c.v).trim();};
   const getNum=(i)=>parseFloat(get(i))||null;
@@ -1420,9 +1436,14 @@ function mapSheetRowToProduct(row,index){
   if(!name||!price) return null;
   const original=getNum(2)||null;
   const discount=original&&original>price?Math.round((original-price)/original*100):null;
-  const rawCat=get(3).toLowerCase();
-  const catMap={'electronics':'electronics','อิเล็กทรอนิกส์':'electronics','beauty':'beauty','ความงาม':'beauty','fashion':'fashion','แฟชั่น':'fashion','home':'home','บ้าน':'home','sports':'sports','กีฬา':'sports','health':'health','สุขภาพ':'health','books':'books','หนังสือ':'books','toys':'toys','ของเล่น':'toys','other':'other','อื่นๆ':'other'};
-  const category=catMap[rawCat]||rawCat||'other';
+  let category;
+  if(catOverride){
+    category=catOverride;
+  } else {
+    const rawCat=get(3).toLowerCase();
+    const catMap={'electronics':'electronics','อิเล็กทรอนิกส์':'electronics','beauty':'beauty','ความงาม':'beauty','fashion':'fashion','แฟชั่น':'fashion','home':'home','บ้าน':'home','บ้านและครัว':'home','sports':'sports','กีฬา':'sports','health':'health','สุขภาพ':'health','books':'books','หนังสือ':'books','toys':'toys','ของเล่น':'toys','other':'other','อื่นๆ':'other'};
+    category=catMap[rawCat]||rawCat||'other';
+  }
   return {id:Date.now()+index,name_th:name,name_en:'',desc_th:get(7),desc_en:get(7),category,badge:get(4)||null,price_thb:price,original_thb:original,discount,shopee:get(5)||null,image:get(6)||null,images:[],videoUrl:null,featured:getBool(8),rating:getNum(9),reviews:parseInt(get(10))||0,rank:parseInt(get(11))||index+1};
 }
 async function syncFromSheet(){
@@ -1441,15 +1462,17 @@ async function syncFromSheet(){
     setSheetStatus('loading','⏳ กำลังประมวลผล...');
     const rows=parseGvizResponse(raw);
     if(!rows.length) throw new Error('ไม่พบข้อมูลในชีท');
-    const products=rows.map((row,i)=>mapSheetRowToProduct(row,i)).filter(Boolean);
+    const catOverride=document.getElementById('sheetCatOverride')?.value||'';
+    const products=rows.map((row,i)=>mapSheetRowToProduct(row,i,catOverride)).filter(Boolean);
     if(!products.length) throw new Error('ต้องมีชื่อสินค้า (A) และราคา (B)');
     const existing=getProducts().filter(p=>p._source!=='sheet');
     const merged=[...existing,...products.map(p=>({...p,_source:'sheet'}))];
     saveProducts(merged);renderAdminPanel();renderAll();
     const lastSync=new Date().toLocaleString('th-TH');
     localStorage.setItem('dealshub_last_sheet_sync',lastSync);
-    setSheetStatus('ok',`✅ ซิงค์สำเร็จ! ${products.length} สินค้า — ${lastSync}`);
-    showToast(`✅ ซิงค์ ${products.length} สินค้าสำเร็จ!`);
+    const catLabel=catOverride?(` [หมวด: ${CATEGORIES[catOverride]?.th||catOverride}]`):'';
+    setSheetStatus('ok',`✅ ซิงค์สำเร็จ! ${products.length} สินค้า${catLabel} — ${lastSync}`);
+    showToast(`✅ ซิงค์ ${products.length} สินค้าสำเร็จ!${catLabel}`);
   }catch(e){setSheetStatus('err','❌ '+e.message);}
   finally{btn.disabled=false;}
 }
