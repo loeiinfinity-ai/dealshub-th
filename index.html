@@ -816,7 +816,7 @@
           3️⃣ คัดลอก <strong>Sheet ID</strong> จาก URL เช่น <code>docs.google.com/spreadsheets/d/<strong>1BxiM...</strong>/edit</code> → วางด้านล่าง
         </div>
         <div class="sheet-input-row">
-          <input class="sheet-input" id="sheetId" placeholder="Sheet ID เช่น 1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms" />
+          <input class="sheet-input" id="sheetId" placeholder="Sheet ID หรือ URL เต็ม เช่น https://docs.google.com/spreadsheets/d/1Bxi..." />
           <input class="sheet-input sheet-input-sm" id="sheetName" placeholder="ชื่อ Tab (Sheet1)" />
           <button class="sheet-sync-btn" id="sheetSyncBtn" onclick="syncFromSheet()">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
@@ -1505,11 +1505,22 @@ function mapSheetRowToProduct(row,index,catOverride=''){
   }
   return {id:Date.now()+index,name_th:name,name_en:'',desc_th:get(7),desc_en:get(7),category,badge:get(4)||null,price_thb:price,original_thb:original,discount,shopee:get(5)||null,image:get(6)||null,images:[],videoUrl:null,featured:getBool(8),rating:getNum(9),reviews:parseInt(get(10))||0,rank:parseInt(get(11))||index+1};
 }
+function extractSheetId(input){
+  if(!input) return '';
+  // handle full URL: https://docs.google.com/spreadsheets/d/<ID>/edit...
+  const m=input.match(/\/spreadsheets\/d\/([a-zA-Z0-9_\-]+)/);
+  if(m) return m[1];
+  // strip trailing slashes/backslashes and return as-is
+  return input.replace(/[\/\\]+$/,'').trim();
+}
 async function syncFromSheet(){
   const btn=document.getElementById('sheetSyncBtn');
-  const idVal=document.getElementById('sheetId')?.value.trim();
+  const rawInput=document.getElementById('sheetId')?.value.trim();
+  const idVal=extractSheetId(rawInput);
   const nameVal=document.getElementById('sheetName')?.value.trim()||'Sheet1';
-  if(!idVal){setSheetStatus('err','⚠️ กรุณากรอก Sheet ID ก่อน');return;}
+  if(!idVal){setSheetStatus('err','⚠️ กรุณากรอก Sheet ID หรือ URL ก่อน');return;}
+  // update field to show clean ID only
+  if(document.getElementById('sheetId')) document.getElementById('sheetId').value=idVal;
   saveSheetConfig();btn.disabled=true;setSheetStatus('loading','⏳ กำลังเชื่อมต่อ Google Sheets...');
   try{
     const encodedName=encodeURIComponent(nameVal);
